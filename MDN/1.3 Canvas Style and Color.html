@@ -1,0 +1,26 @@
+<html>
+
+<head>
+</head>
+
+<body>
+    <canvas id="canvas" width="400px" height="400px" style="border:solid 1px #FF0000;">
+    </canvas>
+    <script type="text/javascript">
+        //https://www.w3.org/TR/css-color-3/
+        //fillStyle=color
+        //strokeStyle=color
+        //Color:rgb,rgba,#,color
+        //globalAlpha = transparencyValue
+        const canEl = document.getElementById("canvas");
+        const ctx = canEl.getContext("2d");
+
+        ctx.fillStyle = "rgb(256,0,0)";
+        ctx.fillRect(30, 30, 50, 50);
+
+        ctx.fillStyle = "rgba(0,0,200,0.5)";
+        ctx.fillRect(40, 40, 50, 50);
+    </script>
+</body>
+
+</html>

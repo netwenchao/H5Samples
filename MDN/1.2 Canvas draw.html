@@ -1,0 +1,105 @@
+<html>
+
+<head>
+</head>
+
+<body>
+    <canvas id="canvas" width="400px" height="400px" style="border:solid 1px #FF0000;">
+    </canvas>
+    <script type="text/javascript">
+        //填充矩形
+        //fillRect(x,y,w,h)
+        //绘制矩形边框
+        //strokeRect(x,y,w,h)
+        //清楚区域
+        //clearRect(x,y,w,h)
+        //beginPath
+        //moveTo
+        //lineTo
+        //closePath
+        //stroke
+        //fill
+        //fillStyle 
+        //angle:(Math.PI/180）*角度
+        //arc(x,y,radius,startAngle,endAngle,anticlockwise)
+        //arc(x1,y1,x2,y2,radius)
+        //quadraticCurveTo(cp1x, cp1y, x, y)//x,y endPoint
+        //bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)//x,y endPoint
+        //rect(x,y,w,h)
+
+        //Object Path2D
+        //Path2D(),Path2D(path),Path2D(svgPath)//svg
+        const canEl = document.getElementById("canvas");
+        const ctx = canEl.getContext("2d");
+
+        function rectTest() {
+            ctx.fillRect(25, 25, 100, 100);
+            ctx.strokeRect(50, 50, 100, 100);
+            ctx.clearRect(50, 50, 100, 100);
+        }
+        //rectTest();
+
+        function pathTest() {
+            ctx.beginPath();
+            ctx.moveTo(200, 200);
+            ctx.lineTo(225, 225);
+            ctx.lineTo(200, 250);
+            ctx.fill();
+        }
+        //pathTest();
+
+        function smail() {
+            ctx.beginPath();
+            ctx.arc(250, 250, 50, 0, Math.PI * 2, true);
+            ctx.moveTo(270, 270);
+            ctx.arc(275, 275, 5, 0, Math.PI * 2, true)
+            ctx.moveTo(325, 275);
+            ctx.arc(320, 270, 5, 0, Math.PI * 2, true)
+            ctx.stroke();
+        }
+        //smail();
+        function arcTest() {
+            for (var i = 0; i < 4; i++) {
+                for (var j = 0; j < 3; j++) {
+                    ctx.beginPath();
+                    ctx.arc(i * 50 + 50, j * 50 + 50, 20, 0, Math.PI + Math.PI * j / 2, i % 2 == 0);
+                    if (i > 1)
+                        ctx.stroke();
+                    else
+                        ctx.fill();
+                }
+            }
+        }
+        //arcTest();
+
+        function RoundRect(ctx, x, y, w, h, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.quadraticCurveTo(x, y, x, y + radius); //Top Left
+            ctx.lineTo(x, y + h - radius);
+            ctx.moveTo(x, y + h - radius);
+            ctx.quadraticCurveTo(x, y + h, x + radius, y + h); //Bottom Left
+            ctx.lineTo(x + w - radius, y + h);
+            ctx.quadraticCurveTo(x + w, y + h, x + w, y + h - radius) //Bottom Right
+            ctx.lineTo(x + w, y + radius);
+            ctx.quadraticCurveTo(x + w, y, x + w - radius, y); //Top Right
+            ctx.lineTo(x + radius, y);
+            ctx.stroke();
+        }
+        RoundRect(ctx, 0, 0, 400, 400, 10);
+        RoundRect(ctx, 10, 10, 380, 380, 10);
+
+        //Draw Actor
+        function actor(ctx, x, y, angle) {
+            ctx.beginPath();
+            ctx.arc(x, y, 30, Math.PI / 180 * angle, Math.PI / 180 * (360 - angle), false);
+            ctx.lineTo(x, y);
+            ctx.closePath();
+            ctx.fill();
+        }
+        actor(ctx, 100, 100, 20);
+        actor(ctx, 100, 150, 30);
+    </script>
+</body>
+
+</html>
