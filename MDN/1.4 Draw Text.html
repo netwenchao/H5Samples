@@ -1,0 +1,69 @@
+<html>
+
+<head>
+    <title></title>
+    <script type="text/javascript" src="sampleChanger.js"></script>
+</head>
+
+<body>
+    <script type="text/javascript">
+        sampleChanger.init({
+            fillText: function() {
+                //text,x,y,maxwidth
+                this.font = "64px 宋体";
+                this.fillText("Hello word!", 0, 100);
+            },
+            strokeText: function() {
+                //text,x,y,maxwidth
+                this.font = "64px serif";
+                this.textAlign = "left";
+                this.direction = "inherit";
+                this.textBaseLine = "alphabetic";
+                this.strokeText("Hello word!", 0, 100);
+            },
+            textAlign: function() {
+                this.font = "48px 宋体";
+                this.textAlign = "center";
+                this.direction = "inherit";
+                this.textBaseLine = "alphabetic";
+                this.fillText("Test Align", 0, 100);
+            },
+            textBaseLine: function() {
+                this.font = "48px 宋体";
+                this.textAlign = "left";
+                this.direction = "inherit";
+                this.textBaseLine = "top"; //top, hanging, middle, alphabetic, ideographic, bottom。默认值是 alphabetic。
+                this.fillText("Test Align doing y.Yes, you can.例子0123456789", 0, 100);
+            },
+            directionRtl: function() {
+                this.font = "48px 宋体";
+                this.textAlign = "left";
+                this.textBaseLine = "top"; //top, hanging, middle, alphabetic, ideographic, bottom。默认值是 alphabetic。
+                this.direction = "rtl"; //：ltr, rtl, inherit。默认值是 inherit。
+                this.fillText("This is sample.", 0, 200);
+            },
+            directionltr: function() {
+                this.font = "48px 宋体";
+                this.textAlign = "left";
+                this.textBaseLine = "top"; //top, hanging, middle, alphabetic, ideographic, bottom。默认值是 alphabetic。
+                this.direction = "ltr"; //：ltr, rtl, inherit。默认值是 inherit。
+                this.fillText("This is sample.", 0, 200);
+            },
+            measureText: function() {
+                //将返回一个 TextMetrics对象的宽度、所在像素，这些体现文本特性的属性。
+                var mr = this.measureText("Test data");
+                this.font = "16px 宋体";
+                this.textAlign = "left";
+                this.textBaseLine = "alphabetic。"; //top, hanging, middle, alphabetic, ideographic, bottom。默认值是 alphabetic。
+                this.direction = "ltr"; //：ltr, rtl, inherit。默认值是 inherit。
+                var rslt = [];
+                for (var s in mr) {
+                    rslt.push(s + ":" + mr[s]);
+                }
+                this.fillText(rslt.join(","), 0, 40);
+            }
+        });
+    </script>
+</body>
+
+</html>

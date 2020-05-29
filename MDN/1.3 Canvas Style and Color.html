@@ -1,25 +1,189 @@
 <html>
 
 <head>
+    <title></title>
+    <script type="text/javascript" src="sampleChanger.js"></script>
 </head>
 
 <body>
-    <canvas id="canvas" width="400px" height="400px" style="border:solid 1px #FF0000;">
-    </canvas>
     <script type="text/javascript">
+        sampleChanger.init({
+            fillStyleSample: function() {
+                for (var i = 0; i < 6; i++) {
+                    for (var j = 0; j < 6; j++) {
+                        this.fillStyle = "rgb(" + Math.floor(255 - 42.5 * i) + "," + Math.floor(255, 42.5 * j) + ',0)';
+                        this.fillRect(i * 20, j * 20, 20, 20);
+                    }
+                }
+            },
+            strokeStyle: function() {
+                for (var i = 0; i < 6; i++) {
+                    for (var j = 0; j < 6; j++) {
+                        this.strokeStyle = "rgb(" + Math.floor(255 - 42.5 * i) + "," + Math.floor(255, 42.5 * j) + ',0)';
+                        this.beginPath();
+                        this.arc(i * 20, j * 20, 5, 0, Math.PI * 2);
+                        this.stroke();
+                    }
+                }
+            },
+            globalAlpha: function() {
+                this.fillStyle = "#FD0";
+                this.fillRect(0, 0, 80, 80);
+                this.fillStyle = "#6D0";
+                this.fillRect(80, 0, 0, 80);
+                this.fillStyle = "#0F0";
+                this.fillRect(0, 80, 80, 80);
+                this.fillStyle = "#0DF";
+                this.fillRect(80, 80, 80, 80);
+                this.globalAlpha = 0.2;
+
+                for (var i = 0; i < 7; i++) {
+                    this.strokeStyle = "#000";
+                    this.beginPath();
+                    this.arc(80, 80, i * 10, 0, Math.PI * 2);
+                    this.stroke();
+                }
+                this.globalAlpha = 1;
+            },
+            rgba: function() {
+                for (var i = 0; i < 10; i++) {
+                    this.fillStyle = "rgba(255,0,0," + (1 - i / 10) + ")";
+                    this.fillRect(i * 40, 0, 40, 40);
+                }
+            },
+            lineStyles_lineWidth: function() {
+                for (var i = 0; i < 10; i++) {
+                    this.lineWidth = 1 + i;
+                    this.beginPath();
+                    this.moveTo(2 + i * 20, 5);
+                    this.lineTo(2 + i * 20, 100);
+                    this.stroke();
+                }
+                //lineCap
+                //lineJoin
+                //miterLimit
+            },
+            lineStyles_lineCap: function() {
+                var lineCap = ["butt", "round", "square"];
+                for (var i = 0; i < 3; i++) {
+                    this.lineWidth = 30;
+                    this.lineCap = lineCap[i];
+                    this.beginPath();
+                    //this.moveTo(0, 20);
+                    //this.lineTo(40, 20);
+                    this.moveTo(10 + i * 60, 20);
+                    this.lineTo(10 + i * 60, 100);
+                    //this.moveTo(0, 100);
+                    //this.lineTo(40, 100);
+                    this.stroke();
+                }
+            },
+            lineStyle_lineJoin: function() {
+                var lineJoin = ["bevel", "round", "miter"]; //miter 受 miterLimit限制
+                for (var i = 0; i < 3; i++) {
+                    this.lineWidth = 10;
+                    this.lineJoin = lineJoin[i];
+                    this.beginPath();
+                    this.moveTo(10 + 60 * i, 0);
+                    this.lineTo(40 + 60 * i, 100);
+                    this.lineTo(10 + 60 * (i + 1), 0);
+                    this.stroke();
+                }
+            },
+            lineStyle_lineDash: function() {
+                //setLineDash,lineDashOffset
+                var offset = 0;
+                var draw = function() {
+                    this.clearRect(0, 0, 600, 600);
+                    this.setLineDash([4, offset]);
+                    this.strokeStyle = "rgb(" + Math.round(Math.random() * 255) + "," + Math.round(Math.random() * 128 + 128) + "," + Math.round(Math.random() * 255) + ")";
+                    this.lineDashOffset = 0;
+                    this.strokeRect(40, 40, 200, 200);
+                    setTimeout(draw, 500);
+                    this.lineDashOffset = offset;
+                    offset += 5;
+                    if (offset > 40) offset = 5;
+                };
+                draw();
+            },
+            gradients: function() {
+                var linearGradient = this.createLinearGradient(0, 0, 0, 100);
+                linearGradient.addColorStop(0, "#fff");
+                linearGradient.addColorStop(0.5, "#999");
+                linearGradient.addColorStop(1, "#000");
+                this.fillStyle = linearGradient;
+                this.fillRect(0, 0, 100, 100);
+
+                var linearGradient2 = this.createLinearGradient(0, 0, 0, 100);
+                linearGradient2.addColorStop(0, "#000000");
+                linearGradient2.addColorStop(0.5, "#00FF00");
+                linearGradient2.addColorStop(1, "#DD00FF");
+                this.strokeStyle = linearGradient2;
+                this.lineWidth = 40;
+                this.strokeRect(100, 100, 100, 100);
+            },
+            radialGradient: function() {
+                var radial = this.createRadialGradient(45, 45, 10, 52, 50, 30);
+                radial.addColorStop(0, "#A7D30C");
+                radial.addColorStop(0.9, "#019F62");
+                radial.addColorStop(1, 'rgba(1,159,98,0)');
+
+                var radial1 = this.createRadialGradient(145, 145, 10, 152, 150, 30);
+                radial1.addColorStop(0, "#FF5F98");
+                radial1.addColorStop(0.75, "#FF0188");
+                radial1.addColorStop(1, "rgba(255,1,136,0)");
+
+                this.fillStyle = radial;
+                this.fillRect(0, 0, 100, 100);
+
+                this.fillStyle = radial1;
+                this.fillRect(100, 100, 200, 200);
+            },
+            pattern: function() {
+                //img,repetition
+                var ctx = this;
+
+                var img = new Image();
+                img.onload = function() {
+                    var patten = ctx.createPattern(img, "repeat");
+                    ctx.fillStyle = patten;
+                    ctx.fillRect(0, 0, 300, 300);
+                };
+                img.src = "https://mdn.mozillademos.org/files/222/Canvas_createpattern.png";
+
+            },
+            shadows: function() {
+                //shadowOffsetX
+                //shadowOffsetY
+                //shadowBlur
+                //shadowColor
+                this.shadowOffsetX = 2;
+                this.shadowOffsetY = 2;
+                this.shadowBlur = 5;
+                this.shadowColor = "#FF0000";
+                this.fillRect(0, 0, 200, 200);
+            },
+            fill: function() {
+                //evenodd
+                //nonzero:default
+                this.beginPath();
+                this.arc(100, 100, 10, 0, Math.PI * 2);
+                this.arc(100, 100, 20, 0, Math.PI * 2);
+                this.fill();
+
+                this.beginPath();
+                this.arc(200, 200, 10, 0, Math.PI * 2);
+                this.arc(200, 200, 20, 0, Math.PI * 2);
+                this.fill("evenodd");
+            }
+        });
+
+        //https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Applying_styles_and_colors
         //https://www.w3.org/TR/css-color-3/
         //fillStyle=color
-        //strokeStyle=color
+        //strokeStyle=color        
         //Color:rgb,rgba,#,color
         //globalAlpha = transparencyValue
-        const canEl = document.getElementById("canvas");
-        const ctx = canEl.getContext("2d");
-
-        ctx.fillStyle = "rgb(256,0,0)";
-        ctx.fillRect(30, 30, 50, 50);
-
-        ctx.fillStyle = "rgba(0,0,200,0.5)";
-        ctx.fillRect(40, 40, 50, 50);
     </script>
 </body>
 
