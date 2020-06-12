@@ -1,0 +1,75 @@
+<meta charset="utf-8"></meta>
+<style type="text/css">
+    #reportOprs {
+        background-color: #CCC;
+        margin-top: 256px;
+    }
+    
+    .bottomBasicInfo {
+        display: inline-block;
+    }
+    
+    .subMenu {
+        display: inline-block;
+        position: relative;
+    }
+    
+    .subMenu ul {
+        display: none;
+        list-style-type: none;
+        position: absolute;
+        margin: 0px;
+        padding: 0px;
+        background-color: #F0F0F0;
+    }
+    
+    .subMenu ul li {
+        padding: 4px 16px;
+    }
+    
+    .subMenu .subMenuItem:hover ul {
+        display: block;
+    }
+    
+    .subMenu .subMenuItem .arrow {
+        background: url(imgs/ic_expand.png) top center;
+        height: 12px;
+        width: 12px;
+        ;
+        display: inline-block;
+    }
+    
+    .subMenu .subMenuItem:hover .arrow {
+        background: url(imgs/ic_expand.png) center -12px;
+        height: 12px;
+        width: 12px;
+        ;
+        display: inline-block;
+    }
+</style>
+<div id="reportOprs" style="display:inline-block;">
+    <div class="bottomBasicInfo" id="IsPositiveWrapper" title="阴阳性" style="display:inline;">
+        <label>
+            <input type="radio" name="IsPositive" value="false">
+            阴性</label>&nbsp;
+        <label>
+            <input type="radio" name="IsPositive" value="true">
+            阳性</label>&nbsp;
+        <label id="UnknownPositive" style="display: none">
+            <input type="radio" name="IsPositive" value="null">
+            未知</label>
+    </div>
+    <input type="button" id="save" onclick="ReportWriter.save()" title="CTRL+S" class="rptMainBarCommand button-report-save" value="保存">
+    <input type="button" id="submit" onclick="ReportWriter.submit()" title="ALT+S" class="rptMainBarCommand button-report-submit" value="提交">
+    <div class="subMenu">
+        <div class="subMenuItem">
+            <input type="button" id="audit" onclick="ReportWriter.audit(false)" title="" class="rptMainBarCommand button-report-audit" value="审核">
+            <span class="arrow"></span>
+            <ul style="top:-32px;">
+                <li><input type="button" id="auditandprint" onclick="ReportWriter.audit(true)" title="" class="rptMainBarCommand button-report-auditandprint" value="审核并打印"></li>
+            </ul>
+        </div>
+    </div>
+    <input type="button" id="reportRealTimePreview" onclick="ReportWriter.showPreview()" title="" class="rptMainBarCommand pagepreview" value="打印预览" href="javascript:ReportWriter.showPreview();">
+    <input type="button" id="editCheckItems" onclick="ReportWriter.editCheckItem.edit()" title="" class="rptMainBarCommand button-report-editcheckitems" value="修改检查项目">
+</div>

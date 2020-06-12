@@ -1,0 +1,108 @@
+<html>
+
+<head>
+    <style type="text/css">
+        .paramArea label {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="file" id="bFile" onchange="loadImage(this)" />
+    <img id="imgArea" style="display: none;;" />
+    <div class="paramArea">
+        <label>帧宽度：<input type="text" id="fW" value="40" /></label>
+        <label>帧高度：<input type="text" id="fH" value="52" /></label>
+        <label>行数：<input type="text" id="fRow" value="1" /></label>
+        <label>列数：<input type="text" id="fCol" value="15" /></label>
+    </div>
+    <input type="button" id="btnCreate" value="Create" onclick="createAnim()" />
+    <input type="button" id="btnView" value="View" onclick="viewFrame()" />
+    <input type="button" id="btnView" value="Run" onclick="run()" />
+    <select id="frameCount">
+    </select>
+
+    <canvas id="cav" width="480" height="320">        
+    </canvas>
+
+    <script type="text/javascript">
+        var tHandler = null;
+        var frames = [];
+        var cav = document.getElementById("cav");
+        var ctx = cav.getContext("2d");
+        var size = {
+            w: cav.width,
+            h: cav.height
+        };
+
+        function loadImage(fobj) {
+            var f = fobj.files[0];
+            if (/image/ig.test(f.type)) {
+                var fr = new FileReader();
+                fr.onload = function() {
+                    document.getElementById("imgArea").setAttribute("src", this.result);
+                };
+                fr.readAsDataURL(f);
+            } else {
+                frames = [];
+                alert("请选择图片文件");
+            }
+
+            if (!tHandler) {
+                clearInterval(tHandler);
+            }
+        };
+
+        function createAnim() {
+            var row = parseInt(document.getElementById("fRow").value);
+            var col = parseInt(document.getElementById("fCol").value);
+            var w = parseInt(document.getElementById("fW").value);
+            var h = parseInt(document.getElementById("fH").value);
+            for (var r = 0; r < row; r++) {
+                for (var j = 0; j < col; j++) {
+                    frames.push({
+                        x: j * w,
+                        y: r * h,
+                        w: w,
+                        h: h
+                    });
+                }
+            }
+            //Bind
+            var sel = document.getElementById("frameCount");
+            sel.innerHTML = "";
+            for (var i = 0; i < frames.length; i++) {
+                var el = document.createElement("option");
+                el.setAttribute("value", i);
+                el.innerText = i;
+                sel.appendChild(el);
+            }
+        }
+
+        function viewFrame() {
+            if (!tHandler) {
+                clearInterval(tHandler);
+            }
+            var fIdx = parseInt(document.getElementById("frameCount").value);
+            var img = document.getElementById("imgArea");
+            ctx.clearRect(0, 0, size.w, size.h);
+            var f = frames[fIdx];
+            ctx.drawImage(img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+        }
+
+        function run() {
+            var fIdx = 0;
+            var img = document.getElementById("imgArea");
+            tHandler = setInterval(function() {
+                if (fIdx >= frames.length) fIdx = 0;
+                ctx.clearRect(0, 0, size.w, size.h);
+                var f = frames[fIdx];
+                ctx.drawImage(img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+                fIdx++;
+            }, 1000 / 60);
+        }
+    </script>
+</body>
+
+</html>

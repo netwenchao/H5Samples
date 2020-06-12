@@ -1,0 +1,165 @@
+<html>
+
+<head>
+    <title></title>
+    <script type="text/javascript" src="sampleChanger.js"></script>
+</head>
+
+<body>
+    <script type="text/javascript">
+        //source-over	默认。在目标图像上显示源图像。
+        //source-atop	在目标图像顶部显示源图像。源图像位于目标图像之外的部分是不可见的。
+        //source-in	在目标图像中显示源图像。只有目标图像内的源图像部分会显示，目标图像是透明的。
+        //source-out	在目标图像之外显示源图像。只会显示目标图像之外源图像部分，目标图像是透明的。
+        //destination-over	在源图像上方显示目标图像。
+        //destination-atop	在源图像顶部显示目标图像。源图像之外的目标图像部分不会被显示。
+        //destination-in	在源图像中显示目标图像。只有源图像内的目标图像部分会被显示，源图像是透明的。
+        //destination-out	在源图像外显示目标图像。只有源图像外的目标图像部分会被显示，源图像是透明的。
+        //lighter	显示源图像 + 目标图像。
+        //copy	显示源图像。忽略目标图像。
+        //xor	使用异或操作对源图像与目标图像进行组合。
+        sampleChanger.init({
+            sourceOver: function() {
+                this.fillStyle = "#000000";
+                this.fillRect(0, 0, 100, 100);
+
+                this.fillStyle = "#FF0000";
+                this.beginPath();
+                this.arc(50, 50, 50, 0, Math.PI * 2);
+                this.fill();
+            },
+            sourceAtop: function() {
+                this.globalCompositeOperation = "source-over";
+                this.fillStyle = "#000000";
+                this.fillRect(0, 0, 100, 100);
+
+                this.globalCompositeOperation = "source-atop";
+
+                //Source
+                this.fillStyle = "#FF0000";
+                this.beginPath();
+                this.arc(80, 80, 50, 0, Math.PI * 2);
+                this.fill();
+                this.globalCompositeOperation = "source-over";
+            },
+            sourceIn: function() {
+                this.globalCompositeOperation = "source-over";
+                this.fillStyle = "#000000";
+                this.fillRect(0, 0, 100, 100);
+
+                this.globalCompositeOperation = "source-in";
+
+                //Source
+                this.fillStyle = "#FF0000";
+                this.beginPath();
+                this.arc(80, 80, 50, 0, Math.PI * 2);
+                this.fill();
+                this.globalCompositeOperation = "source-over";
+            },
+            sourceOut: function() {
+                this.globalCompositeOperation = "source-over";
+                this.fillStyle = "#000000";
+                this.fillRect(0, 0, 100, 100);
+
+                this.globalCompositeOperation = "source-out";
+
+                //Source
+                this.fillStyle = "#FF0000";
+                this.beginPath();
+                this.arc(80, 80, 50, 0, Math.PI * 2);
+                this.fill();
+                this.globalCompositeOperation = "source-over";
+            },
+            destinationOver: function() {
+                this.globalCompositeOperation = "source-over";
+                this.fillStyle = "#000000";
+                this.fillRect(0, 0, 100, 100);
+
+                this.globalCompositeOperation = "destination-over";
+
+                //Source
+                this.fillStyle = "#FF0000";
+                this.beginPath();
+                this.arc(80, 80, 50, 0, Math.PI * 2);
+                this.fill();
+                this.globalCompositeOperation = "source-over";
+            },
+            destinationAtop: function() {
+                this.globalCompositeOperation = "source-over";
+                this.fillStyle = "#000000";
+                this.fillRect(0, 0, 100, 100);
+
+                this.globalCompositeOperation = "destination-atop";
+
+                //Source
+                this.fillStyle = "#FF0000";
+                this.beginPath();
+                this.arc(80, 80, 50, 0, Math.PI * 2);
+                this.fill();
+                this.globalCompositeOperation = "source-over";
+            },
+            destinationIn: function() {
+                this.globalCompositeOperation = "source-over";
+                this.fillStyle = "#000000";
+                this.fillRect(0, 0, 100, 100);
+
+                this.globalCompositeOperation = "destination-in";
+
+                //Source
+                this.fillStyle = "#FF0000";
+                this.beginPath();
+                this.arc(80, 80, 50, 0, Math.PI * 2);
+                this.fill();
+                this.globalCompositeOperation = "source-over";
+            },
+            destinationOut: function() {
+                this.globalCompositeOperation = "source-over";
+                this.fillStyle = "#000000";
+                this.fillRect(0, 0, 100, 100);
+
+                this.globalCompositeOperation = "destination-out";
+
+                //Source
+                this.fillStyle = "#FF0000";
+                this.beginPath();
+                this.arc(80, 80, 50, 0, Math.PI * 2);
+                this.fill();
+                this.globalCompositeOperation = "source-over";
+            },
+            clip: function() {
+                //Clip
+                var drawStar = function(ctx, r) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(r, 0);
+                    for (var i = 0; i < 9; i++) {
+                        ctx.rotate(Math.PI / 5);
+                        if (i % 2 == 0) {
+                            ctx.lineTo((r / 0.525731) * 0.200811, 0);
+                        } else {
+                            ctx.lineTo(r, 0);
+                        }
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                };
+                this.fillRect(0, 0, 300, 300);
+                this.translate(128, 128);
+                this.beginPath();
+                this.arc(0, 0, 120, 0, Math.PI * 2);
+                this.clip();
+
+                for (var i = 0; i < 60; i++) {
+                    this.save();
+                    this.fillStyle = "#FFFFFF";
+                    this.translate(Math.random() * 100, Math.random() * 100);
+                    drawStar(this, 10);
+                    this.restore();
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

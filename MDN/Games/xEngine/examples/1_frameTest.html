@@ -1,0 +1,29 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="../xsys.js"></script>
+    <script type="text/javascript" src="../xUtil.js"></script>
+    <script type="text/javascript" src="../xapp.js"></script>
+</head>
+
+<body>
+    MaxFrame:<span id="maxF"></span> MinFrame:
+    <span id="minF"></span> CurFrame:
+    <span id="curF"></span>
+    <script type="text/javascript">
+        var game = new Game();
+        game.addListener(new AppEventListener({
+            onBeforeRender: function() {
+                return true;
+            },
+            onAfterRender: function() {
+                document.getElementById("maxF").innerText = FrameState.maxFrame;
+                document.getElementById("minF").innerText = FrameState.minFrame;
+                document.getElementById("curF").innerText = FrameState.currentFrame;
+            }
+        }));
+        game.run(-1);
+    </script>
+</body>
+
+</html>

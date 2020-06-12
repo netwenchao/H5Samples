@@ -1,0 +1,239 @@
+<html>
+
+<head>
+    <meta charset="utf-8"></meta>
+    <script type="text/javascript" src="http://127.0.0.1/Scripts/jquery/jquery-1.7.2.min.js?v=626">
+    </script>
+    <style type="text/css">
+        #zoomWrapper {
+            transform-origin: inherit;
+            -webkit-transform-origin: inherit;
+            -moz-transform-origin: inherit;
+            -o-transform-origin: inherit;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #zoomWrapper.rate1 {
+            overflow: auto;
+            position: inherit;
+        }
+        
+        #zoomWrapper.rateg1 {
+            overflow: initial;
+        }
+        
+        .zoomPNoneIE {
+            transform-origin: 0 0;
+            -ms-transform-origin: 0 0;
+            -moz-transform-origin: 0 0;
+            -webkit-transform-origin: 0 0;
+            -o-transform-origin: 0 0;
+        }
+        
+        .rate1 .zoomPNoneIE {
+            transform: inherit;
+            -ms-transform-origin: inherit;
+            -moz-transform-origin: inherit;
+            -webkit-transform-origin: inherit;
+            -o-transform-origin: inherit;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="width: 800px;margin:0 auto; position: fixed; top:0;left:400px;z-index: 100;">
+        <select id="zoomCtrl" onchange="reportPageZoomer.scale($(this).val())" style="font-size: 24px;">
+            <option value="50">50</option>
+            <option value="60">60</option>
+            <option value="70">70</option>
+            <option value="80">80</option>
+            <option value="90">90</option>
+            <option value="100" selected="selected">100</option>
+            <option value="110">110</option>
+            <option value="120">120</option>
+            <option value="130">130</option>
+            <option value="140">140</option>
+            <option value="fixHeight">适应页面</option>
+        </select>
+    </div>
+    <div id="reportInfoContainer" style="width:1320px;height:100%;margin:0px auto;background-color: #F8E3Df;overflow:auto;">
+        <div id="reportContent" style="background-color: darkorange;width:1299px;height:1010px;">
+
+        </div>
+    </div>
+    <script type="text/javascript">
+        var log = function(msg, prefix) {
+            prefix = prefix || "";
+            if (msg == undefined || msg == null) return;
+            if (typeof(msg) == "string") {
+                console.log(prefix + ":" + msg);
+            } else {
+                console.log(prefix + ":" + JSON.stringify(msg));
+            }
+        };
+
+        $(window).resize(function() {
+            //Changed(Container.H,Container.W)
+            var container = $("#reportInfoContainer");
+            var rCnt = $("#reportContent");
+            var cSize = {
+                width: container.width(),
+                height: container.height()
+            };
+
+            var rSize = {
+                width: rCnt.width(),
+                height: rCnt.height()
+            };
+
+            log(cSize, "#reportInfoContainer")
+            log(rSize, "#reportContent")
+            reportPageZoomer.onContainerSizeChanged(cSize.width, cSize.height);
+        });
+
+        var reportPageZoomer = (function() {
+            var DomZoomer = function() {
+                var isIE = function() {
+                    return navigator.userAgent.indexOf("MSIE") > -1;
+                };
+
+                var node = null;
+                var container = null;
+                var inited = false;
+                var curRate = -1;
+                var getWrapper = function(onlyGet) {
+                    var wrapperId = "zoomWrapper";
+                    var wrapper = null;
+                    if ((wrapper = $("#" + wrapperId)).size() > 0) {
+                        return wrapper;
+                    }
+
+                    if (onlyGet) return wrapper;
+
+                    //width,height,padding-left
+                    wrapper = $("<div id=\"zoomWrapper\"><div id=\"zmer\" class=\"zoomer\"><div style=\"width:auto;height:auto;\"></div></div></div>");
+                    var zoomer = wrapper.find(".zoomer");
+                    if (!isIE()) {
+                        zoomer.addClass("zoomPNoneIE");
+                    }
+                    wrapper.insertBefore(node);
+                    wrapper.find(">div:eq(0)>div:eq(0)").append(node);
+                    return wrapper;
+                };
+
+                var getZoomCss = (function() {
+                    return isIE() ? function(r) {
+                        return {
+                            "zoom": (r * 100) + "%"
+                        };
+                    } : function(r) {
+                        return {
+                            "transform": "scale(" + r + ")",
+                            "-ms-transform": "scale(" + r + ")",
+                            "-moz-transform": "scale(" + r + ")",
+                            "-webkit-transform": "scale(" + r + ")",
+                            "-o-transform": "scale(" + r + ")",
+                            "transform-origin": "0 0",
+                            "-ms-transform-origin": "0 0",
+                            "-webkit-transform-origin": "0 0",
+                            "-moz-transform-origin": "0 0",
+                            "-o-transform-origin": "0 0"
+                        };
+                    };
+                })();
+
+                var setScale = function(wrapper, rate) {
+                    zoomRate = rate;
+                    wrapper.find(".zoomer").css(getZoomCss(rate));
+                    var scared = originSize.scaled(rate);
+                    var container = $("#reportInfoContainer");
+                    var rCnt = $("#reportContent");
+                    var cSize = {
+                        width: container.width(),
+                        height: container.height()
+                    };
+                    log(scared, "setScale.scared");
+                    log(originSize, "originSize");
+                    log(cSize, "#reportInfoContainer");
+                    log(originSize.width - scared.width, "Diff")
+                    wrapper.css(scared);
+                    var zClientRect = wrapper.find(".zoomer")[0].getBoundingClientRect();
+                    //wrapper.css("padding-left", Math.round((originSize.width - zClientRect.width) / 2));
+                    wrapper.css("margin-left", Math.round((originSize.cWidth - scared.width) / 2));
+                    $(document.body).trigger("scaled");
+                };
+
+                var originSize = {
+                    width: 0,
+                    height: 0,
+                    cWidth: 0,
+                    cHeight: 0,
+                    scaled: function(r) {
+                        return {
+                            width: r * this.width,
+                            height: r * this.height
+                        };
+                    },
+                    saveToNode: function() {
+                        node.attr("zoomer_OriginW", this.width);
+                        node.attr("zoomer_OriginH", this.height);
+                    },
+                    refresh: function() {
+                        originSize.width = node.width();
+                        originSize.height = node.height();
+                        this.saveToNode();
+                    }
+                };
+
+                this.init = function(ele, cnter) {
+                    node = $(ele);
+                    container = $(cnter);
+                };
+
+                this.onContainerSizeChanged = function(cw, ch) {
+                    if (curRate == -1) return;
+                    var zh = parseInt(node.attr("zoomer_originh"));
+                    if (zh <= 0 || isNaN(zh)) return;
+                    var nRate = (ch - 10) * 100 / zh;
+                    this.scale(nRate);
+                    originSize.cWidth = cw;
+                    originSize.cHeight = ch;
+                };
+
+                this.scale = function(rate) {
+                    if (!inited) {
+                        originSize.refresh();
+                        originSize.cWidth = container.width();
+                        originSize.cHeight = container.height();
+                        inited = true;
+                    }
+
+                    if (rate == "fixHeight") {
+                        //debugger;
+                        rate = originSize.cHeight / originSize.height;
+                        rate = rate * 100;
+                    }
+                    curRate = rate;
+                    var w = getWrapper();
+                    var r = parseInt(rate);
+                    setScale(w, rate / 100);
+                    if (r < 100) {
+                        w.removeClass("rate1");
+                        w.removeClass("rateg1");
+                    } else if (r > 100) {
+                        w.removeClass("rate1");
+                        w.addClass("rateg1");
+                    } else { //eq 1
+                        w.addClass("rate1");
+                        w.removeClass("rateg1");
+                    }
+                };
+            };
+            return new DomZoomer();
+        })();
+        reportPageZoomer.init($("#reportContent"), $("#reportInfoContainer"));
+    </script>
+</body>
+
+</html>

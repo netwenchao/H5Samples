@@ -1,0 +1,52 @@
+<html>
+
+<head>
+    <title></title>
+    <script type="text/javascript" src="sampleChanger.js"></script>
+</head>
+
+<body>
+    <script type="text/javascript">
+        sampleChanger.init({
+            drawImage: function() {
+                var img = new Image();
+                var ctx = this;
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0);
+                    ctx.strokeStyle = "#FF0000";
+                    ctx.moveTo(25, 110);
+                    ctx.lineTo(80, 80);
+                    ctx.lineTo(120, 60);
+                    ctx.lineTo(160, 20);
+                    ctx.stroke();
+                };
+                img.src = "imgs/drawImage.jpg";
+            },
+            scaling: function() {
+                var img = new Image();
+                var ctx = this;
+                img.onload = function() {
+                    for (var i = 0; i < 4; i++) {
+                        for (var j = 0; j < 2; j++) {
+                            ctx.drawImage(img, i * 75, j * 58, 75, 58);
+                        }
+                    }
+                };
+                img.src = "https://mdn.mozillademos.org/files/5397/rhino.jpg";
+            },
+            slicing: function() {
+                //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+                var img = new Image();
+                var ctx = this;
+                img.onload = function() {
+                    ctx.drawImage(img, 50, 80, 87, 105, 23, 23, 87, 105);
+                    ctx.drawImage(document.getElementById("frame"), 0, 0)
+                };
+                img.src = "https://mdn.mozillademos.org/files/5397/rhino.jpg";
+            }
+        });
+    </script>
+    <img src="imgs/PhotoFrame.png" id="frame" style="display: none;" />
+</body>
+
+</html>

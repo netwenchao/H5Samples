@@ -1,0 +1,41 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta charset="utf-8" />
+    <script type="text/javascript" src="../engine/loader.js"></script>
+    <title></title>
+</head>
+
+<body>
+    <canvas id="mainCav" width="600" height="300">                        
+    </canvas>
+    <script type="text/javascript">
+        window.requestAnimFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.oRequestAnimationFrame || window.mozRequestAnimationFrame || function(fun) {
+            setTimeout(fun, 1000 / 60);
+        };
+        window.onload = function() {
+            var canv = document.getElementById("mainCav");
+            var ctx = canv.getContext("2d");
+            var size = {
+                width: canv.width,
+                height: canv.height
+            };
+            var gameScene = new scene();
+
+            var ld = new resLoader();
+            ld.load("2DParrallaxScrollingDemo_texture_0.png", function(img, src, ix) {
+                var mainBg = new sprite("bg", img, 0, 0, 600, 300, 1210, 0, 600, 300);
+                var topGrass = new sprite("topGrass", img, 0, 50, 600, 135, 0, 1875, 600, 135); //top grass
+                var road = new sprite("road", img, 0, 150, 600, 200, 1210, 540, 600, 200); //road
+                var bottomGrass = new sprite("bottomLayer", img, 0, 200, 1110, 200, 0, 1650, 1110, 200); //bottomLayer
+                gameScene.addChild(mainBg).addChild(topGrass).addChild(road).addChild(bottomGrass).draw(ctx);
+            }, function(src) {
+                console.error("load " + src + " failed.");
+            });
+        };
+    </script>
+</body>
+
+</html>

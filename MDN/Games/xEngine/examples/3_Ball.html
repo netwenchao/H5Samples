@@ -1,0 +1,52 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="../xsys.js"></script>
+    <script type="text/javascript" src="../xUtil.js"></script>
+    <script type="text/javascript" src="../xapp.js"></script>
+</head>
+
+<body>
+    <script type="text/javascript">
+        function Ball(name, r) {
+            this.r = r || 10;
+            this.update = function() {
+                var w = this.owner.w,
+                    h = this.owner.h;
+                if (this.x >= (w - r) || this.x < r) {
+                    this.dx = -this.dx;
+                }
+                if (this.y >= (h - r) || this.y < r) {
+                    this.dy = -this.dy;
+                }
+                RenderObj.prototype.update.call(this);
+                //this.prototype.update();
+            };
+
+            this.render = function(ctx) {
+                console.log("ball.render");
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                ctx.fill();
+            };
+        }
+        Ball.prototype = new RenderObj();
+
+        var g = new Game();
+        var sc = g.sceneManager.createScene();
+        //sc.setBgImg("bg.png", 1);
+        for (var i = 0; i < 10; i++) {
+            var b = new Ball("bName" + i, (MathUtil.randInt(30) || 10));
+            b.color = ColorUtil.rgb(MathUtil.randInt(255), MathUtil.randInt(255), MathUtil.randInt(255));
+            b.moveTo(MathUtil.randInt(480), MathUtil.randInt(320));
+            b.dx = MathUtil.randInt(5) || 2;
+            b.dy = MathUtil.randInt(5) || 2;
+            sc.addRObj(b);
+        }
+
+        g.run(-1);
+    </script>
+</body>
+
+</html>
