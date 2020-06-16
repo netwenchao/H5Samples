@@ -1,0 +1,101 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="../xsys.js"></script>
+    <script type="text/javascript" src="../xUtil.js"></script>
+    <script type="text/javascript" src="../xapp.js"></script>
+    <script type="text/javascript" src="../xframes.js"></script>
+</head>
+
+<body>
+    <img src="maro.png" id="maro" /><br/>
+    <input type="button" value="Start" onclick="start(this)" />
+    <label>
+        动画
+        <select id="anim" onchange="changeAnim(this)">
+            <option value="run" selected>Run</option>
+            <option value="jump">Jump</option>
+            <option value="crouch">Crouch</option>
+        </select>
+    </label>
+    <label>
+        速度
+        <select id="speed" onchange="changeSpeed(this)">
+            <option value="0.25" selected>0.25X</option>
+            <option value="0.5">0.5X</option>
+            <option value="1">1X</option>
+            <option value="2">2X</option>
+            <option value="4">4X</option>
+        </select>
+    </label><br/>
+    <canvas id="cav" width="400" height="400"></canvas>
+    <script type="text/javascript">
+        var cav = document.getElementById("cav");
+        var img = document.getElementById("maro");
+        var ctx = cav.getContext("2d");
+        var anim = new Animations();
+        var tHandler = null;
+        var fCtrl = null;
+        var cw = 0;
+        var ch = 0;
+
+        function initAnim() {
+            var runFrames = new Frames("run", img);
+            var jumpFrames = new Frames("jump", img);
+            var crouchFrames = new Frames("crouch", img);
+            for (var i = 0; i < 3; i++) {
+                runFrames.addFrame(48 * i, 0, 48, 48);
+            }
+            jumpFrames.addFrame(0, 0, 48, 48);
+            jumpFrames.addFrame(48 * 6, 0, 48, 48);
+
+            crouchFrames.addFrame(0, 0, 48, 48);
+            crouchFrames.addFrame(48 * 14, 0, 48, 48);
+
+            anim.add("run", runFrames);
+            anim.add("jump", jumpFrames);
+            anim.add("crouch", crouchFrames);
+
+            fCtrl = new FrameCtrl();
+            fCtrl.setAnims(anim, "run");
+        }
+
+        function start(el) {
+            if (el.value == "Stop") {
+                if (tHandler) {
+                    clearInterval(tHandler);;
+                    tHandler = null;
+                    el.value = "Start";
+                    return;
+                }
+            } else {
+                el.value = "Stop";
+            }
+            cw = cav.width;
+            ch = cav.height;
+
+            var curAnim = document.getElementById("anim").value;
+            var curSpeed = document.getElementById("speed").value;
+            FrameState.start();
+            tHandler = setInterval(function() {
+                FrameState.update();
+                var f = fCtrl.getNextFrame();
+                ctx.clearRect(0, 0, cw, ch);
+                ctx.drawImage(f[0], f[1], f[2], f[3], f[4], 0, 0, 48, 48);
+            }, 1000 / 60);
+        }
+
+        function changeSpeed(el) {
+            var s = parseFloat(el.value);
+            fCtrl.speed = s || fCtrl.speed;
+        }
+
+        function changeAnim(el) {
+            var anim = el.value;
+            fCtrl.setCurrent(anim);
+        }
+        initAnim();
+    </script>
+</body>
+
+</html>
