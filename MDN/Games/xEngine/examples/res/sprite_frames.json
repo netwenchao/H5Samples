@@ -1,0 +1,16 @@
+{
+    "title": {
+        "type": 0,
+        "img": "title"
+    },
+    "mario": {
+        "type": 1,
+        "img": "mario",
+        "imgdesc": [1, 15, 48, 48],
+        "animations": {
+            "run": [0, 2],
+            "jump": [6],
+            "crouch": [14]
+        }
+    }
+}

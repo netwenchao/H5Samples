@@ -1,0 +1,269 @@
+<html>
+
+<head>
+    <style type="text/css">
+
+    </style>
+</head>
+
+<body>
+    <script type="text/javascript">
+        function AStar() {
+            function Point(x, y, g, h) {
+                this.x = x;
+                this.y = y;
+                this.g = g || 0;
+                this.h = h || 0;
+                this.f = this.g + this.h;
+                this.parent = null;
+                this.refreshF = function() {
+                    this.f = this.g + this.h;
+                };
+                this.setG = function(v) {
+                    this.g = v || 0;
+                    this.refreshF();
+                };
+                this.setH = function(v) {
+                    this.h = v || 0;
+                    this.refreshF();
+                };
+                this.setParent = function(p) {
+                    this.parent = p;
+                };
+            }
+
+            function Board() {
+                var cav = null;
+                var ctx = null;
+                var w = 640;
+                var h = 480;
+
+                this.init = function(opt) {
+                    w = opt.w || w;
+                    h = opt.h || h;
+                    cav = document.createElement("canvas");
+                    cav.setAttribute("width", w);
+                    cav.setAttribute("height", h);
+                    document.body.appendChild(cav);
+                    ctx = cav.getContext("2d");
+                };
+
+                this.getColor = function(c, r, start, end, cur, rData) {
+                    if (rData[c] == 1) return "#000000";
+                    if (r == start.y && c == start.x) return "#FF0000";
+                    if (r == end.y && c == end.x) return "#00FF00";
+                    if (cur && r == cur.y && c == cur.x) return "#FFFF00";
+                    return "#F1F1F1";
+                };
+                var self = this;
+                this.render = function(map, start, end, curNode) {
+                    ctx.clearRect(0, 0, w, h);
+                    var cw = w / map[0].length;
+                    var ch = h / map.length;
+                    for (var r = 0; r < map.length; r++) {
+                        var rData = map[r];
+                        for (var c = 0; c < rData.length; c++) {
+                            ctx.fillStyle = self.getColor(c, r, start, end, curNode, rData);
+                            ctx.beginPath();
+                            ctx.rect(c * cw, r * ch, cw, ch);
+                            ctx.fill();
+                        }
+                    }
+
+                    if (curNode) {
+                        var node = curNode.parent;
+                        while (node != null && node != undefined) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = "#FF0000";
+                            ctx.rect(node.x * cw, node.y * ch, cw, ch);
+                            ctx.stroke();
+                            node = node.parent;
+                        }
+                    }
+                };
+
+                this.markAsRoad = function(map, node) {
+                    if (node == null) return;
+                    var cw = w / map[0].length;
+                    var ch = h / map.length;
+                    ctx.beginPath();
+                    ctx.fillStyle = "#00ff00";
+                    ctx.rect(node.x * cw, node.y * ch, cw, ch);
+                    ctx.fill();
+                };
+            };
+
+            var cbk = null;
+            var openList = [];
+            var openKeys = {};
+            var closeList = [];
+            var closeKeys = {};
+            var start = null;
+            var end = null;
+            var cur = null;
+            var map = null;
+            var maxRow = 0;
+            var maxCol = 0;
+            var prev = null;
+            var board = null;
+            var bFinded = false;
+
+            var getKey = function(x, y) {
+                if (arguments.length == 1) {
+                    y = arguments[0].y;
+                    x = arguments[0].x;
+                }
+                return "_" + x + "_" + y;
+            };
+
+            var getDis = function(p, e) {
+                var xDiff = Math.abs(e.x - p.x);
+                var yDiff = Math.abs(e.y - p.y);
+                return (xDiff == 1 && yDiff == 1) ? 14 : (xDiff + yDiff) * 10;
+            };
+
+            this.setCallback = function(callback) {
+                cbk = callback;
+            };
+
+            this.init = function(mp, bShowBoard) {
+                map = mp;
+                maxRow = map.length;
+                maxCol = map[0].length;
+                board = bShowBoard ? new Board() : null;
+                bShowBoard && board.init({
+                    w: 100,
+                    h: 100
+                });
+            };
+
+            this.clear = function() {
+                openList = [];
+                closeList = [];
+                openKeys = {};
+                closeKeys = {};
+                start = null;
+                end = null;
+                bFinded = false;
+            };
+
+            this.start = function(sx, sy, ex, ey) {
+                this.clear();
+                start = new Point(sx, sy);
+                end = new Point(ex, ey);
+                openList.push(start);
+                this.nextStep();
+            };
+
+            this.nextStep = function() {
+                if (bFinded) {
+                    cbk && cbk();
+                    this.showRslt();
+                    return;
+                }
+                prev = cur;
+                cur = openList.shift();
+                if (!cur) {
+                    console.log("No point in OpenList.");
+                    cbk && cbk();
+                    return;
+                }
+                cur.parent = prev;
+                delete openKeys[getKey(cur)];
+                console.log("Current Point(" + cur.x + "," + cur.y + ").");
+                closeList.push(cur);
+                closeKeys[getKey(cur)] = cur;
+                board && board.render(map, start, end, cur);
+                if (this.procCurrentNode()) return;
+                openList.sort(function(p1, p2) {
+                    return p1.f - p2.f;
+                });
+            };
+
+            this.showRslt = function() {
+                var node = end;
+                var path = [];
+                var mx = 100;
+                while (node != null && node != undefined) {
+                    path.push("(" + node.x + "," + node.y + ")");
+                    node = node.parent;
+                    board && board.markAsRoad(map, node);
+                    mx--;
+                    if (mx <= 0) break;
+                }
+                console.log(path.join("->"));
+                cbk && cbk();
+            };
+
+            this.procCurrentNode = function() {
+                //debugger;
+                if (end.parent != null) {
+                    this.showRslt();
+                    return;
+                };
+
+                var p = null;
+                for (var r = cur.y - 1; r <= cur.y + 1; r++) {
+                    if (r < 0 || r >= maxRow) continue;
+                    for (var c = cur.x - 1; c <= cur.x + 1; c++) {
+                        if (c < 0 || c >= maxCol) continue;
+
+                        if (r == end.y && c == end.x) {
+                            console.log("Find end point");
+                            end.parent = cur;
+                            bFinded = true;
+                            return true;
+                        }
+
+                        if (map[r][c] == 1) {
+                            console.log("Point(" + c + "," + r + ") is unavailable.");
+                            continue;
+                        }
+
+                        var pk = getKey(c, r);
+                        //debugger;
+                        if (!closeKeys[pk]) {
+                            if (openKeys[pk]) {
+                                p = openKeys[pk];
+                                p.setParent(cur);
+                                //console.log("Point is in Open list.(" + p.x + "," + p.y + ")");
+                            } else {
+                                p = new Point(c, r);
+                                openList.push(p);
+                                openKeys[pk] = p;
+                                console.log("Point add to Open list.(" + p.x + "," + p.y + ")");
+                            }
+                            p.setG(getDis(start, p));
+                            p.setH(getDis(end, p));
+                        }
+                    }
+                }
+            };
+        };
+
+        var roadFinder = new AStar();
+        roadFinder.init([
+            //0  1  2  3  4  5  6  7  8  9
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], //0
+            [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 1, 1, 1, 1],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], //5
+            [0, 0, 0, 0, 1, 1, 0, 1, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], //7
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], //8
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+        ], true);
+        roadFinder.start(3, 8, 9, 9);
+        var thandler = setInterval(function() {
+            roadFinder.nextStep();
+        }, 100);
+        roadFinder.setCallback(function() {
+            debugger;
+            clearInterval(thandler);
+        });
+    </script>
+</body>
+
+</html>

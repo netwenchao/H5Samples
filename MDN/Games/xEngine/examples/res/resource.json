@@ -1,0 +1,9 @@
+{
+    "image": [
+        { "name": "mario", "src": "../maro.png" },
+        { "name": "ng", "src": "../bg.png" }
+    ],
+    "frame": [
+        { "name": "sprint", "src": "sprite_frames.json" }
+    ]
+}

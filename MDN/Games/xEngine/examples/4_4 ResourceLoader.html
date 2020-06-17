@@ -1,0 +1,77 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="../xsys.js"></script>
+    <script type="text/javascript" src="../xUtil.js"></script>
+    <script type="text/javascript" src="../xrenderobject.js"></script>
+    <script type="text/javascript" src="../xscene.js"></script>
+    <script type="text/javascript" src="../xscememanager.js"></script>
+    <script type="text/javascript" src="../xframes.js"></script>
+    <script type="text/javascript" src="../xsprite.js"></script>
+    <script type="text/javascript" src="../xapp.js"></script>
+</head>
+
+<body>
+    <img src="maro.png" id="maro" style="display: none;" /><br/>
+    <script type="text/javascript">
+        function Mario() {
+            this.update = function() {
+                var w = this.owner.w,
+                    h = this.owner.h;
+                if (this.x < 20 || this.x > w - 20) {
+                    this.dx = -this.dx;
+                    this.isXFlip = (this.dx < 0);
+                }
+                Sprite.prototype.update.call(this);
+            }
+        }
+        Mario.prototype = new Sprite();
+        Mario.prototype.constructor = Mario;
+
+        var game = new Game();
+
+        function initGame() {
+            var scm = game.sceneManager;
+            var sc = scm.createScene({
+                w: 640,
+                h: 480,
+                color: "#FFFFFF"
+            });
+            initRenderObj(sc);
+        }
+
+        function initRenderObj(sc) {
+            var img = document.getElementById("maro");
+            var runFrames = new Frames("run", img);
+            var jumpFrames = new Frames("jump", img);
+            var crouchFrames = new Frames("crouch", img);
+            for (var i = 0; i < 3; i++) {
+                runFrames.addFrame(48 * i, 0, 48, 48);
+            }
+            jumpFrames.addFrame(0, 0, 48, 48);
+            jumpFrames.addFrame(48 * 6, 0, 48, 48);
+
+            crouchFrames.addFrame(0, 0, 48, 48);
+            crouchFrames.addFrame(48 * 14, 0, 48, 48);
+
+            var anim = new Animations();
+            anim.add("run", runFrames);
+            anim.add("jump", jumpFrames);
+            anim.add("crouch", crouchFrames);
+            for (var i = 0; i < 30; i++) {
+                var sp = new Mario();
+                var x = Math.min(MathUtil.randInt(640) || 100, 620);
+                sp.moveTo(x, MathUtil.randInt(480));
+                sp.dx = MathUtil.randInt(2) || 1;
+                sp.w = sp.h = 48;
+                sp.setAnimSpeed((MathUtil.randInt(4) || 1) * 0.25);
+                sp.setAnims(anim, "run");
+                sc.addRObj(sp);
+            }
+        }
+        initGame();
+        game.run(-1);
+    </script>
+</body>
+
+</html>
