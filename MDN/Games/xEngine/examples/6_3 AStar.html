@@ -2,7 +2,10 @@
 
 <head>
     <style type="text/css">
-
+        canvas {
+            display: block;
+            margin: 8px;
+        }
     </style>
 </head>
 
@@ -64,8 +67,11 @@
                         var rData = map[r];
                         for (var c = 0; c < rData.length; c++) {
                             ctx.fillStyle = self.getColor(c, r, start, end, curNode, rData);
+                            ctx.strokeStyle = "#666666";
                             ctx.beginPath();
                             ctx.rect(c * cw, r * ch, cw, ch);
+                            ctx.stroke();
+                            ctx.rect(c * cw + 1, r * ch + 1, cw - 2, ch - 2);
                             ctx.fill();
                         }
                     }
@@ -86,9 +92,12 @@
                     if (node == null) return;
                     var cw = w / map[0].length;
                     var ch = h / map.length;
+                    ctx.fillStyle = "#00aa00";
+                    ctx.strokeStyle = "#000000";
                     ctx.beginPath();
-                    ctx.fillStyle = "#00ff00";
                     ctx.rect(node.x * cw, node.y * ch, cw, ch);
+                    ctx.stroke();
+                    ctx.rect(node.x * cw + 1, node.y * ch + 1, cw - 2, ch - 2);
                     ctx.fill();
                 };
             };
@@ -104,9 +113,9 @@
             var map = null;
             var maxRow = 0;
             var maxCol = 0;
-            var prev = null;
             var board = null;
             var bFinded = false;
+            var directOnly = false;
 
             var getKey = function(x, y) {
                 if (arguments.length == 1) {
@@ -126,15 +135,16 @@
                 cbk = callback;
             };
 
-            this.init = function(mp, bShowBoard) {
+            this.init = function(mp, bShowBoard, dirOnly) {
                 map = mp;
                 maxRow = map.length;
                 maxCol = map[0].length;
                 board = bShowBoard ? new Board() : null;
                 bShowBoard && board.init({
-                    w: 100,
-                    h: 100
+                    w: 200,
+                    h: 200
                 });
+                directOnly = dirOnly;
             };
 
             this.clear = function() {
@@ -161,14 +171,14 @@
                     this.showRslt();
                     return;
                 }
-                prev = cur;
+
                 cur = openList.shift();
                 if (!cur) {
                     console.log("No point in OpenList.");
                     cbk && cbk();
                     return;
                 }
-                cur.parent = prev;
+
                 delete openKeys[getKey(cur)];
                 console.log("Current Point(" + cur.x + "," + cur.y + ").");
                 closeList.push(cur);
@@ -183,7 +193,7 @@
             this.showRslt = function() {
                 var node = end;
                 var path = [];
-                var mx = 100;
+                var mx = 9999;
                 while (node != null && node != undefined) {
                     path.push("(" + node.x + "," + node.y + ")");
                     node = node.parent;
@@ -208,6 +218,8 @@
                     for (var c = cur.x - 1; c <= cur.x + 1; c++) {
                         if (c < 0 || c >= maxCol) continue;
 
+                        if (directOnly && c != cur.x && r != cur.y) continue;
+
                         if (r == end.y && c == end.x) {
                             console.log("Find end point");
                             end.parent = cur;
@@ -225,16 +237,20 @@
                         if (!closeKeys[pk]) {
                             if (openKeys[pk]) {
                                 p = openKeys[pk];
-                                p.setParent(cur);
+                                var pg = cur.g + getDis(cur, p);
+                                if (pg < p.g) {
+                                    p.setParent(cur);
+                                }
                                 //console.log("Point is in Open list.(" + p.x + "," + p.y + ")");
                             } else {
                                 p = new Point(c, r);
+                                p.setParent(cur);
                                 openList.push(p);
                                 openKeys[pk] = p;
+                                p.setG(getDis(start, p));
+                                p.setH(getDis(end, p));
                                 console.log("Point add to Open list.(" + p.x + "," + p.y + ")");
                             }
-                            p.setG(getDis(start, p));
-                            p.setH(getDis(end, p));
                         }
                     }
                 }
@@ -247,21 +263,42 @@
             [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], //0
             [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 0, 0, 0, 0, 0], //3
             [0, 0, 0, 0, 1, 0, 1, 1, 1, 1],
             [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], //5
-            [0, 0, 0, 0, 1, 1, 0, 1, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
             [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], //7
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], //8
+            [0, 0, 0, 0, 1, 0, 1, 1, 1, 0], //8
             [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
         ], true);
-        roadFinder.start(3, 8, 9, 9);
+        roadFinder.start(0, 4, 6, 9);
         var thandler = setInterval(function() {
             roadFinder.nextStep();
         }, 100);
         roadFinder.setCallback(function() {
-            debugger;
             clearInterval(thandler);
+        });
+
+        var roadFinderDr = new AStar();
+        roadFinderDr.init([
+            //0  1  2  3  4  5  6  7  8  9
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], //0
+            [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 0, 0, 0, 0, 0], //3
+            [0, 0, 0, 0, 1, 0, 1, 1, 1, 1],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], //5
+            [0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], //7
+            [0, 0, 0, 0, 1, 0, 1, 1, 1, 0], //8
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+        ], true, true);
+        roadFinderDr.start(0, 4, 6, 9);
+        var thandlerDr = setInterval(function() {
+            roadFinderDr.nextStep();
+        }, 100);
+        roadFinderDr.setCallback(function() {
+            clearInterval(thandlerDr);
         });
     </script>
 </body>
