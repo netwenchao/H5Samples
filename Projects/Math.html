@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <style type="text/css">
+            .q{
+                display: inline-block;
+                padding: 4px 8px;
+                font-size: 24px;
+            }
+            .q span{padding:0 4px;}
+            .q span.r{width: 32px;display: inline-block;border-bottom: solid 1px #000;}
+        </style>
+    </head>
+    <body>
+        <div id="ques"></div>
+        <script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+        <script type="text/javascript">
+            var output=[];
+            var ct=1200;
+            String.prototype.format=function(){
+                var args = arguments;
+                return this.replace(/\{\d+\}/g, function (m) {
+                    var dt = args[m.substring(1, m.length - 1)];
+                    return (dt == null || dt == undefined) ? "" : dt;
+                });
+            };
+
+            function ran(min,max,prev){
+                var val= Math.floor(Math.random()*(max-min))+min;
+                return val==prev?ran(min,max,prev):val;
+            }
+            
+            var prev=0;
+            while((ct--)>0){
+                var right=ran(5,9,prev);
+                output.push("<div class=\"q\"><span>{0}</span><span>X</span><span>{1}</span><span>=</span><span class=\"r\"></span></div>".format(ran(2,9),right));
+                prev=right;
+            }
+            $("#ques").html(output.join("\r\n"));
+        </script>
+    </body>
+</html>
