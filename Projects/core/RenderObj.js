@@ -1,4 +1,4 @@
-export class RenderObj{
+export default class RenderObj{
     constructor(img,x,y,w,h){        
         this.owner=null;
         this.img=img;
@@ -17,6 +17,11 @@ export class RenderObj{
     moveTo(x,y){
         this.x=x||this.x;
         this.y=y||this.y;
+    }
+
+    move(xOffset,yOffset){
+        this.x+=xOffset||0;
+        this.y+=yOffset||0;
     }
 
     update(delta){

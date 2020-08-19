@@ -1,0 +1,183 @@
+<html>
+    <head>
+        <style type="text/css">
+        #cav{border:solid 1px #E1E1E1;}
+        @font-face {
+            font-family: "DS-Digital";
+            src: url("fonts/Ds-digib.ttf");
+        }
+        </style>
+    </head>
+    <body>
+        <canvas id="cav" width="480" height="320">            
+        </canvas>
+        <script type="text/javascript">
+            function Button(x,y,w,h,state,img){
+                this.x=x;
+                this.y=y;
+                this.w=w;
+                this.h=h;
+                this.state=state||"normal";
+                this.img=img;
+            };
+
+            Button.prototype.getSy=function(){
+                switch(this.state){
+                    case "pressed":
+                        return 262;
+                    case "hover":
+                        return 131;                    
+                }
+                return 0;
+            };
+
+            Button.prototype.changeState=function(pos,mState){                
+                if(this.containsPoint(pos)){
+                    if(mState=="down"){
+                        this.state="pressed";
+                    }else{
+                        this.state="hover";
+                    }
+                }else{
+                    this.state="normal";
+                }                
+            }
+            Button.prototype.isPressed=function(){
+                return this.state=="pressed";
+            }
+
+            Button.prototype.containsPoint=function(p){
+                return p.x>=this.x 
+                    && p.x<=this.x+this.w
+                    && p.y<=this.y+this.h
+                    && p.y>=this.y;
+            };
+
+            Button.prototype.draw=function(ctx){
+                var sy=this.getSy();
+                ctx.drawImage(this.img,0,sy,180,120,this.x,this.y,this.w,this.h);
+                ctx.font="16px DS-Digital";
+                ctx.textAlign="center";
+                ctx.fillStyle="#FFFFFF";
+                ctx.fillText(this.state,this.x+this.w/2,this.y+this.h/2);
+            };
+
+            function SpaceShip(x,y,w,h,img){
+                this.x=x;
+                this.y=y;
+                this.w=w;
+                this.h=h;
+                this.img=img;
+                this.dragging=false;
+            }
+
+            SpaceShip.prototype.draw=function(ctx){
+                ctx.drawImage(this.img,0,0,256,256,this.x,this.y,this.w,this.h);
+            };
+
+            function Dialog(w,h,winW,winH,title,txt){
+                this.visible=false;
+                this.w=w;
+                this.h=h;
+                this.x=(winW-this.w)/2;
+                this.y=(winH-this.h)/2;
+                this.title=title;
+                this.text=txt||"";
+            }
+
+            Dialog.prototype.draw=function(ctx){
+                var gradient=ctx.createLinearGradient(0,(this.x+this.w)/2,0,this.y+this.h);
+                gradient.addColorStop(0,"rgba(160,160,160,0.8)");
+                gradient.addColorStop(1,"rgba(2550,255,2550,0.8)");
+                ctx.beginPath();
+                ctx.rect(this.x,this.y,this.w,this.h);
+                ctx.closePath();
+                ctx.fillStyle=gradient;
+                ctx.fill();
+                ctx.lineWidth=2;
+                ctx.strokeStyle="rgba(128,128,128,0.5)";
+                ctx.stroke();
+                //Draw title
+
+                //Draw Text
+            }
+
+
+            function Game(node){
+                var w=480;
+                var h=320;
+                this.node=node;
+                this.ctx=node.getContext("2d");                
+                this.handler=null;
+                this.btnImage=new Image();
+                this.btnImage.src="images/button.png";                
+                
+                this.init=function(){
+                    this.button=new Button(20,h-100,90,65,null,this.btnImage);
+                    this.bindMouseDown=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseDown.call(self,e);
+                        }
+                    })(this);
+
+                    this.bindMouseMove=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseMove.call(self,e);
+                        }
+                    })(this);
+
+                    this.bindMouseUp=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseUp.call(self,e);
+                        }
+                    })(this);
+                    this.mainLoop=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.update.call(self);
+                        }
+                    })(this);
+                    this.regEvents();
+                    this.update();
+                }
+
+                this.regEvents=function(){
+                    this.node.addEventListener("mousedown",this.bindMouseDown);
+                    this.node.addEventListener("mouseup",this.bindMouseUp)
+                    this.node.addEventListener("mousemove",this.bindMouseMove);
+                };
+                this.getCursorPoint=function(e){
+                    return {x:e.offsetX,y:e.offsetY};
+                }
+
+                this.onMouseDown=function(e){
+                    var pos=this.getCursorPoint(e);
+                    this.button.changeState(pos,"down");
+                };
+
+                this.onMouseMove=function(e){
+                    var pos=this.getCursorPoint(e);
+                    this.button.changeState(pos,"move");
+                };
+                this.onMouseUp=function(e){
+                    this.selectNode=null;
+                    var pos=this.getCursorPoint(e);
+                    this.button.changeState(pos,"up");
+                };
+
+                this.update=function(){
+                    window.cancelAnimationFrame(this.handler);
+                    this.ctx.clearRect(0,0,w,h);
+
+                    this.button.draw(this.ctx);
+                    this.handler=window.requestAnimationFrame(this.mainLoop);
+                };
+            }
+            var game=new Game(document.getElementById("cav"));
+            game.init();
+        </script>
+    </body>
+</html>
