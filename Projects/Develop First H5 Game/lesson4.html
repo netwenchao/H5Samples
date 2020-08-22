@@ -1,0 +1,229 @@
+<html>
+    <head>
+        <style type="text/css">
+        #cav{border:solid 1px #E1E1E1;}
+        @font-face {
+            font-family: "DS-Digital";
+            src: url("fonts/Ds-digib.ttf");
+        }
+        </style>
+    </head>
+    <body>
+        <canvas id="cav" width="480" height="320">            
+        </canvas>
+        <script type="text/javascript">
+            function Dragon(x,y,w,h,img){
+                this.x=x;
+                this.y=y;
+                this.w=w;
+                this.h=h;
+                this.img=img;
+                this.dragging=false;
+                this.prevPos=null;
+                this.dir=0;
+                this.fIdx=0;
+                this.fdur=0;
+            }
+
+            Dragon.prototype.updateDir=function(xDiff,yDiff){
+                xDiff=Math.floor(xDiff);
+                yDiff=Math.floor(yDiff);
+                var dir=0;
+                if(xDiff<0) dir=dir|2;//left
+                if(yDiff<0) dir=dir|4;//top
+                if(xDiff>0) dir=dir|8;//right
+                if(yDiff>0) dir=dir|16;//bottom
+                
+                if(dir==2){
+                    this.dir=4;
+                    return;
+                }
+
+                if(dir==4){
+                    this.dir=6;
+                    return;
+                }
+
+                if(dir==8){
+                    this.dir=0;
+                    return;
+                }
+
+                if(dir==16){
+                    this.dir=2;
+                    return;
+                }
+
+                if(dir==24){
+                    this.dir=1;
+                    return;
+                }
+                
+                if(dir==18){
+                    this.dir=3;
+                    return;
+                }
+
+                if(dir==6){
+                    this.dir=5;
+                    return;
+                }
+
+                if(dir==12){
+                    this.dir=7;
+                    return;
+                }
+            };
+
+            Dragon.prototype.draw=function(ctx){
+                ctx.drawImage(this.img,0,0,256,256,this.x,this.y,this.w,this.h);
+            };
+            Dragon.prototype.containsPoint=function(p){
+                return p.x>=this.x 
+                    && p.x<=this.x+this.w
+                    && p.y<=this.y+this.h
+                    && p.y>=this.y;
+            };
+            Dragon.prototype.onMouseDown=function(pos){
+                if(this.containsPoint(pos)){
+                    this.dragging=true;
+                    this.setPos(pos);
+                }
+            };
+
+            Dragon.prototype.setPos=function(pos){
+                this.x=pos.x;
+                this.y=pos.y;                
+            };
+
+            Dragon.prototype.onMouseMove=function(pos){
+                if(this.dragging){                    
+                    this.setPos(pos);                    
+                }
+                //Change pos
+                var prev=this.prevPos;
+                if(prev!=null){
+                    this.updateDir(pos.x-prev.x,pos.y-prev.y);
+                }
+                this.prevPos=pos;
+            }
+            Dragon.prototype.onMouseUp=function(pos){
+                this.dragging=false;
+            }
+
+            Dragon.prototype.update=function(delta){
+                this.fdur+=Math.floor(delta);
+                if(this.fdur>200){
+                    this.fIdx++;
+                }
+                this.fIdx=this.fIdx>9?0:this.fIdx;
+            }
+
+            Dragon.prototype.draw=function(ctx){
+                ctx.drawImage(this.img,this.fIdx*75,this.dir*70,this.w,this.h,this.x-this.w/2,this.y-this.h/2,this.w,this.h);
+            };
+
+            function Game(node){
+                var w=480;
+                var h=320;
+                this.node=node;
+                this.ctx=node.getContext("2d");                
+                this.handler=null;
+                this.prevTime=0;
+                this.bgImage=new Image();
+                this.bgImage.src="images/hell.jpg";
+                this.spriteImg=new Image();
+                this.spriteImg.src="images/dragon.gif";
+                this.dragonSound=new Audio("media/dragon.wav");
+                this.dragonSound.volume=0.9;
+
+                this.wingSound=new Audio("media/wings.wav");
+                this.wingSound.volume=0.9;
+                this.wingSound.addEventListener("ended",function(){
+                    this.currentTime=0;
+                    this.play();
+                },false);
+                this.wingSound.play();
+
+                this.bgPos=0;
+                this.init=function(){                    
+                    this.hero=new Dragon(w/2,h/3,75,70,this.spriteImg);
+
+                    this.bindMouseDown=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseDown.call(self,e);
+                        }
+                    })(this);
+
+                    this.bindMouseMove=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseMove.call(self,e);
+                        }
+                    })(this);
+
+                    this.bindMouseUp=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseUp.call(self,e);
+                        }
+                    })(this);
+                    this.mainLoop=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.update.call(self);
+                        }
+                    })(this);
+                    this.regEvents();
+                    this.prevTime=performance.now();
+                    this.update();
+                }
+
+                this.regEvents=function(){
+                    this.node.addEventListener("mousedown",this.bindMouseDown);
+                    this.node.addEventListener("mouseup",this.bindMouseUp)
+                    this.node.addEventListener("mousemove",this.bindMouseMove);
+                };
+                this.getCursorPoint=function(e){
+                    return {x:e.offsetX,y:e.offsetY};
+                }
+
+                this.onMouseDown=function(e){
+                    var pos=this.getCursorPoint(e);
+                    this.hero.onMouseDown(pos);
+                };
+
+                this.onMouseMove=function(e){
+                    var pos=this.getCursorPoint(e);
+                    this.hero.onMouseMove(pos);
+                };
+
+                this.onMouseUp=function(e){
+                    this.selectNode=null;
+                    var pos=this.getCursorPoint(e);
+                    this.hero.onMouseUp(pos);
+                    this.dragonSound.currentTime = 0;
+                    this.dragonSound.play();
+                };
+
+                this.update=function(){
+                    window.cancelAnimationFrame(this.handler);
+                    var now=performance.now();
+                    this.ctx.clearRect(0,0,w,h);
+                    this.bgPos-=4;
+                    if(this.bgPos<=0){
+                        this.bgPos=1045;
+                    }
+                    this.ctx.drawImage(this.bgImage,this.bgPos,0,1024,768,0,0,w,h);                    
+                    this.hero.update(now-this.prevTime);                    
+                    this.hero.draw(this.ctx);
+                    this.prevTime=now;
+                    this.handler=window.requestAnimationFrame(this.mainLoop);
+                };
+            }
+            var game=new Game(document.getElementById("cav"));
+            game.init();
+        </script>
+    </body>
+</html>

@@ -19,6 +19,8 @@
                 this.h=h;
                 this.state=state||"normal";
                 this.img=img;
+                this.onClick=null;
+                this.text="";
             };
 
             Button.prototype.getSy=function(){
@@ -35,9 +37,10 @@
                 if(this.containsPoint(pos)){
                     if(mState=="down"){
                         this.state="pressed";
-                    }else{
-                        this.state="hover";
+                    }else if(mState=="up"){
+                        this.state && this.onClick && this.onClick(this);
                     }
+                    this.state="hover";
                 }else{
                     this.state="normal";
                 }                
@@ -59,7 +62,7 @@
                 ctx.font="16px DS-Digital";
                 ctx.textAlign="center";
                 ctx.fillStyle="#FFFFFF";
-                ctx.fillText(this.state,this.x+this.w/2,this.y+this.h/2);
+                ctx.fillText(this.text,this.x+this.w/2,this.y+this.h/2);
             };
 
             function SpaceShip(x,y,w,h,img){
@@ -74,18 +77,40 @@
             SpaceShip.prototype.draw=function(ctx){
                 ctx.drawImage(this.img,0,0,256,256,this.x,this.y,this.w,this.h);
             };
+            SpaceShip.prototype.containsPoint=function(p){
+                return p.x>=this.x 
+                    && p.x<=this.x+this.w
+                    && p.y<=this.y+this.h
+                    && p.y>=this.y;
+            };
+            SpaceShip.prototype.onMouseDown=function(pos){
+                if(this.containsPoint(pos)){
+                    this.dragging=true;
+                    this.x=pos.x;
+                    this.y=pos.y;
+                }
+            }
+            SpaceShip.prototype.onMouseMove=function(pos){
+                if(this.dragging){
+                    this.x=pos.x;
+                    this.y=pos.y;
+                }
+            }
+            SpaceShip.prototype.onMouseUp=function(pos){
+                this.dragging=false;
+            }
 
-            function Dialog(w,h,winW,winH,title,txt){
+            function Dialog(w,h,winW,winH){
                 this.visible=false;
                 this.w=w;
                 this.h=h;
                 this.x=(winW-this.w)/2;
-                this.y=(winH-this.h)/2;
-                this.title=title;
-                this.text=txt||"";
+                this.y=(winH-this.h)/2;                
+                this.page=0;
             }
 
             Dialog.prototype.draw=function(ctx){
+                if(!this.visible)return;
                 var gradient=ctx.createLinearGradient(0,(this.x+this.w)/2,0,this.y+this.h);
                 gradient.addColorStop(0,"rgba(160,160,160,0.8)");
                 gradient.addColorStop(1,"rgba(2550,255,2550,0.8)");
@@ -97,11 +122,42 @@
                 ctx.lineWidth=2;
                 ctx.strokeStyle="rgba(128,128,128,0.5)";
                 ctx.stroke();
+                                
                 //Draw title
-
-                //Draw Text
+                ctx.font = '42px DS-Digital';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.shadowColor = '#000';
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+                ctx.shadowBlur = 2;
+                ctx.fillStyle = '#fff';
+                if(this.page==1){
+                    ctx.fillText('Welcome to lesson #3', ctx.canvas.width/2, 150);
+                    ctx.font = '24px DS-Digital';
+                    ctx.fillText('After closing dialog you will able', ctx.canvas.width/2, 250);
+                    ctx.fillText('to handle with spaceship with your mouse', ctx.canvas.width/2, 280);
+                }else if (this.page==2){
+                    ctx.fillText('Second page of dialog', ctx.canvas.width/2, 150);
+                    ctx.font = '24px DS-Digital';
+                    ctx.fillText('Any another text', ctx.canvas.width/2, 250);
+                }
             }
 
+            Dialog.prototype.changeState=function(){
+                this.page++;
+                console.log(this.page);
+                if(this.page==3){
+                    this.page=0;
+                    this.visible=false;
+                    return "Click to show";
+                }else if(this.page>0){
+                    this.visible=true;
+                    return "Page"+this.page;
+                } else{
+                    return "Page"+this.page;
+                }
+            };
 
             function Game(node){
                 var w=480;
@@ -110,10 +166,25 @@
                 this.ctx=node.getContext("2d");                
                 this.handler=null;
                 this.btnImage=new Image();
-                this.btnImage.src="images/button.png";                
+                this.btnImage.src="images/button.png";
+                this.bgImage=new Image();
+                this.bgImage.src="images/stars.jpg";
+                this.spaceShipImg=new Image();
+                this.spaceShipImg.src="images/space_ship.png";        
+                this.bgPos=0;
+                this.dialog=new Dialog(420,280,w,h);
                 
                 this.init=function(){
                     this.button=new Button(20,h-100,90,65,null,this.btnImage);
+                    this.button.onClick=(function(scope){
+                        var self=scope;
+                        return function(node){
+                            var text=self.dialog.changeState();
+                            node.text=text;
+                        };
+                    })(this);
+                    this.hero=new SpaceShip(w/2,h/3,90,60,this.spaceShipImg);
+
                     this.bindMouseDown=(function(scope){
                         var self=scope;
                         return function(e){
@@ -156,23 +227,32 @@
                 this.onMouseDown=function(e){
                     var pos=this.getCursorPoint(e);
                     this.button.changeState(pos,"down");
+                    this.hero.onMouseDown(pos);
                 };
 
                 this.onMouseMove=function(e){
                     var pos=this.getCursorPoint(e);
                     this.button.changeState(pos,"move");
+                    this.hero.onMouseMove(pos);
                 };
                 this.onMouseUp=function(e){
                     this.selectNode=null;
                     var pos=this.getCursorPoint(e);
                     this.button.changeState(pos,"up");
+                    this.hero.onMouseUp(pos);
                 };
 
                 this.update=function(){
                     window.cancelAnimationFrame(this.handler);
                     this.ctx.clearRect(0,0,w,h);
-
+                    this.bgPos-=10;
+                    if(this.bgPos<=0){
+                        this.bgPos=1024;
+                    }
+                    this.ctx.drawImage(this.bgImage,this.bgPos,0,1024,768,0,0,w,h);
                     this.button.draw(this.ctx);
+                    this.hero.draw(this.ctx);
+                    this.dialog.draw(this.ctx);
                     this.handler=window.requestAnimationFrame(this.mainLoop);
                 };
             }
