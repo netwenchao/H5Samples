@@ -1,0 +1,13 @@
+G:\opensource\Html5Game\H5Samples\Img2Base64\obj\Debug\netcoreapp3.1\Img2Base64.csprojAssemblyReference.cache
+G:\opensource\Html5Game\H5Samples\Img2Base64\obj\Debug\netcoreapp3.1\Img2Base64.AssemblyInfoInputs.cache
+G:\opensource\Html5Game\H5Samples\Img2Base64\obj\Debug\netcoreapp3.1\Img2Base64.AssemblyInfo.cs
+G:\opensource\Html5Game\H5Samples\Img2Base64\obj\Debug\netcoreapp3.1\Img2Base64.csproj.CoreCompileInputs.cache
+G:\opensource\Html5Game\H5Samples\Img2Base64\bin\Debug\netcoreapp3.1\Img2Base64.exe
+G:\opensource\Html5Game\H5Samples\Img2Base64\bin\Debug\netcoreapp3.1\Img2Base64.deps.json
+G:\opensource\Html5Game\H5Samples\Img2Base64\bin\Debug\netcoreapp3.1\Img2Base64.runtimeconfig.json
+G:\opensource\Html5Game\H5Samples\Img2Base64\bin\Debug\netcoreapp3.1\Img2Base64.runtimeconfig.dev.json
+G:\opensource\Html5Game\H5Samples\Img2Base64\bin\Debug\netcoreapp3.1\Img2Base64.dll
+G:\opensource\Html5Game\H5Samples\Img2Base64\bin\Debug\netcoreapp3.1\Img2Base64.pdb
+G:\opensource\Html5Game\H5Samples\Img2Base64\obj\Debug\netcoreapp3.1\Img2Base64.dll
+G:\opensource\Html5Game\H5Samples\Img2Base64\obj\Debug\netcoreapp3.1\Img2Base64.pdb
+G:\opensource\Html5Game\H5Samples\Img2Base64\obj\Debug\netcoreapp3.1\Img2Base64.genruntimeconfig.cache

@@ -1,0 +1,243 @@
+<html>
+    <head>
+        <style type="text/css">
+        #cav{border:solid 1px #E1E1E1;}
+        @font-face {
+            font-family: "DS-Digital";
+            src: url("fonts/Ds-digib.ttf");
+        }
+        </style>
+    </head>
+    <body>
+        <canvas id="cav" width="320" height="480">            
+        </canvas>
+        <script type="text/javascript">            
+            function Bricks(w,h,r,c){
+                this.w=w||0;
+                this.h=h||0;
+                this.rows=r;
+                this.cols=c;
+                this.colors=['#9d9d9d', '#f80207', '#feff01', '#0072ff', '#fc01fc', '#03fe03'];
+                this.debug=true;
+                this.update=function(delta){
+
+                };
+                this.draw=function(ctx){
+                    ctx.fillStyle="#333333";
+                    ctx.fillRect(0,0,this.winW,this.winH);
+                };
+            }
+            
+            function KeyMonitor(){
+                this.status={};
+                this.onKeyDown=function(e){
+                    this.status[e.keyCode]=true;
+                };
+
+                this.onKeyUp=function(e){                    
+                    this.status[e.keyCode]=false;
+                };
+
+                this.keyPressed=function(code){
+                    return this.status.hasOwnProperty(code) && this.status[code];
+                };
+            }
+
+            KeyMonitor.prototype.KeyLeft=37;
+            KeyMonitor.prototype.KeyUp=38;
+            KeyMonitor.prototype.KeyRight=39;
+            KeyMonitor.prototype.KeyDown=40;
+
+            function Ball(x,y,r,dx,dy,owner){
+                this.x=x;
+                this.y=y;                
+                this.r=r||16;
+                this.dx=dx||0;
+                this.dy=dy||0;
+                this.owner=owner;
+            }
+
+            Ball.prototype.draw=function(ctx){
+                ctx.beginPath();                
+                ctx.fillStyle="#FFF";
+                ctx.arc(this.x,this.y,this.r,0,2*Math.PI);
+                ctx.fill();
+                ctx.closePath();
+            };
+
+            Ball.prototype.update=function(delta){
+                this.x+=this.dx*delta;
+                this.y+=this.dy*delta;
+                if(this.x>=this.owner.w-this.r || this.x<=0){
+                    this.dx*=-1;
+                }
+
+                if(this.y>=this.owner.h-this.r || this.y<=0){
+                    this.dy*=-1;
+                }
+            };
+
+            function Padd(x,y,w,h,owner){
+                this.x=x||0;
+                this.y=y||0;
+                this.w=w||0;
+                this.h=h||0;
+                this.speed=100/1000;
+                this.owner=owner;
+
+                this.update=function(delta){
+                    if(this.owner.isLeftPressed()){
+                        this.x-=delta*this.speed;
+                    }else if (this.owner.isRightPressed()){
+                        this.x+=delta*this.speed;
+                    }
+                    
+                    if(this.x>=this.owner.w-this.w){
+                        this.x=this.owner.w-this.w;
+                    }else if(this.x<=0){
+                        this.x=0;
+                    }
+                }
+
+                this.draw=function(ctx){
+                    ctx.strokeStyle="#666";
+                    ctx.fillStyle="#FFF";
+                    ctx.beginPath();
+                    ctx.rect(this.x,this.y,this.w,this.h);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.closePath();
+                };
+            }            
+
+            function Game(node){
+                this.w=320;
+                this.h=480;
+                var BallSize=8;
+                var boardY=this.h-60;
+                var boardW=64;
+                this.node=node;
+                this.win=window;
+                this.ctx=node.getContext("2d");
+                this.handler=null;
+                this.prevTime=0;
+                this.keyMonitor=new KeyMonitor();
+                this.bricks=new Bricks(this.w,this.h);
+                this.isLeftPressed=function(){
+                    return  this.keyMonitor.keyPressed(this.keyMonitor.KeyLeft);
+                };
+
+                this.isRightPressed=function(){
+                    return  this.keyMonitor.keyPressed(this.keyMonitor.KeyRight);
+                };
+                
+                this.ball=new Ball((this.w-BallSize)/2,boardY-BallSize,BallSize,null,null,this);
+                this.padd=new Padd((this.w-boardW)/2,boardY,boardW,8,this);
+
+                this.init=function(){
+                    this.bindMouseDown=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseDown.call(self,e);
+                        }
+                    })(this);
+
+                    this.bindMouseMove=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseMove.call(self,e);
+                        }
+                    })(this);
+
+                    this.bindMouseUp=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseUp.call(self,e);
+                        }
+                    })(this);
+                    
+                    this.bindKeyDown=(function(scope){
+                        var self=scope;
+                        return function(e){                            
+                            self.onKeyDown.call(self,e);
+                            e.preventDefault();
+                        };
+                    })(this);
+
+                    this.bindKeyUp=(function(scope){
+                        var self=scope;
+                        return function(e){                            
+                            self.onKeyUp.call(self,e);
+                            e.preventDefault();
+                        };
+                    })(this);
+
+                    this.mainLoop=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            window.cancelAnimationFrame(self.handler);
+                            var now=performance.now();                            
+                            self.update.call(self,Math.floor(now-self.prevTime));
+                            self.draw.call(self);
+                            self.prevTime=now;
+                            self.handler=window.requestAnimationFrame(self.mainLoop);
+                        }
+                    })(this);
+                    this.regEvents();
+                    this.prevTime=performance.now();
+                    this.mainLoop();
+                }
+
+                this.regEvents=function(){
+                    this.node.addEventListener("mousedown",this.bindMouseDown);
+                    this.node.addEventListener("mouseup",this.bindMouseUp)
+                    this.node.addEventListener("mousemove",this.bindMouseMove);
+                    this.win.addEventListener("keyup",this.bindKeyUp,true);
+                    this.win.addEventListener("keydown",this.bindKeyDown,true);
+                };
+                this.getCursorPoint=function(e){
+                    return {x:e.offsetX,y:e.offsetY};
+                }
+
+                this.onMouseDown=function(e){
+                    var pos=this.getCursorPoint(e);
+                };
+
+                this.onMouseMove=function(e){
+                    var pos=this.getCursorPoint(e);
+                };
+
+                this.onMouseUp=function(e){
+                    this.selectNode=null;
+                    var pos=this.getCursorPoint(e);                    
+                };
+
+                this.onKeyDown=function(e){                    
+                    this.keyMonitor.onKeyDown(e);
+                };
+
+                this.onKeyUp=function(e){
+                    this.keyMonitor.onKeyUp(e);
+                };
+
+                this.update=function(delta){
+                    this.ball.update(delta);
+                    this.bricks.update(delta);
+                    this.padd.update(delta);
+                };
+
+                this.draw=function(ctx){
+                    this.ctx.clearRect(0,0,this.w,this.h);
+                    this.ctx.fillStyle="#111";
+                    this.ctx.fillRect(0,0,this.w,this.h);
+
+                    this.bricks.draw(this.ctx);
+                    this.ball.draw(this.ctx);
+                    this.padd.draw(this.ctx);
+                };
+            }
+            var game=new Game(document.getElementById("cav"));
+            game.init();
+        </script>
+    </body>
+</html>

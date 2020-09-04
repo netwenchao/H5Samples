@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v3.1",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "Img2Base64/1.0.0": {
+        "runtime": {
+          "Img2Base64.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Img2Base64/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

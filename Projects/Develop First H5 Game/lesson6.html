@@ -11,7 +11,7 @@
     <body>
         <canvas id="cav" width="624" height="624">            
         </canvas>
-        <script type="text/javascript">
+        <script type="text/javascript">            
             function Map(w,h,cSize){
                 this.winW=w;
                 this.winH=h;
@@ -20,6 +20,7 @@
                 this.maps=[];
                 var imgsrc=["images/brick.png","images/steel.png","images/water.png","images/forest.png"];
                 this.imgRes=[];
+                this.debug=true;
                 for(var i=0;i<imgsrc.length;i++){
                     this.imgRes[i]=new Image();
                     this.imgRes[i].src=imgsrc[i];
@@ -28,29 +29,37 @@
 
             Map.prototype.load=function(maps){
                 this.maps=maps;
+                this.maxRows=this.maps.length;
+                this.maxCols=this.maps[0].length;
             };
 
             Map.prototype.draw=function(ctx){
                 ctx.fillStyle="#333333";
                 ctx.fillRect(0,0,this.winW,this.winH);
                 for(var r=0;r<this.maps.length;r++){
-                    for(var c=0;c<this.maps[r].length;c++){
-                        if(this.maps[c][r]==0) continue;
-                        ctx.drawImage(this.imgRes[this.maps[c][r]-1],0,0,this.cellSize,this.cellSize,this.cSize*r,this.cSize*c,this.cSize,this.cSize);
+                    for(var c=0;c<this.maps[r].length;c++){                        
+                        if(this.maps[r][c]!=0)
+                            ctx.drawImage(this.imgRes[this.maps[r][c]-1],0,0,this.cellSize,this.cellSize,this.cSize*c,this.cSize*r,this.cSize,this.cSize);
+                        
+                        if(this.debug){
+                            ctx.beginPath();
+                            ctx.strokeStyle="#FF0000";
+                            ctx.rect(this.cSize*r,this.cSize*c,this.cSize,this.cSize);
+                            ctx.stroke();
+                            ctx.closePath();
+                        }
                     }
                 }
             };
-
+            
             function KeyMonitor(){
                 this.status={};
                 this.onKeyDown=function(e){
-                    debugger;
-                    this.status[keyCode]=true;
+                    this.status[e.keyCode]=true;
                 };
 
-                this.onKeyUp=function(e){
-                    debugger;
-                    this.status[keyCode]=false;
+                this.onKeyUp=function(e){                    
+                    this.status[e.keyCode]=false;
                 };
 
                 this.keyPressed=function(code){
@@ -58,33 +67,127 @@
                 };
             }
 
-            function Tank(x,y,cSize){
+            KeyMonitor.prototype.KeyLeft=37;
+            KeyMonitor.prototype.KeyUp=38;
+            KeyMonitor.prototype.KeyRight=39;
+            KeyMonitor.prototype.KeyDown=40;
+
+            function Tank(x,y,cSize,map){
                 this.x=x;
                 this.y=y;
                 this.cSize=cSize;
                 this.dir=0;//rlud
+                this.moving=false;
+                this.speed=1;
                 this.img=new Image();
                 this.img.src="images/tank.png";
+                this.map=map;
             }
 
             Tank.prototype.draw=function(ctx){
                 ctx.drawImage(this.img,this.dir*48,0,48,48,this.x,this.y,this.cSize,this.cSize);
             };
 
-            Tank.prototype.updateDir=function(){
+            Tank.prototype.updateDir=function(monitor){
+                if(monitor.keyPressed(monitor.KeyLeft)){
+                    this.dir=1;
+                    this.moving=true;
+                    return;
+                }
 
+                if(monitor.keyPressed(monitor.KeyRight)){
+                    this.dir=0;
+                    this.moving=true;
+                    return;
+                }
+
+                if(monitor.keyPressed(monitor.KeyUp)){
+                    this.dir=2;
+                    this.moving=true;
+                    return;
+                }
+
+                if(monitor.keyPressed(monitor.KeyDown)){
+                    this.dir=3;
+                    this.moving=true;
+                    return;
+                }
+                this.moving=false;
+            };
+
+            Tank.prototype.checkCollisions=function(){
+                //Todo get cell and check collisions
+                var col=Math.floor(this.x/this.map.cSize);
+                var row=Math.floor(this.y/this.map.cSize);
+                //rlud
+                if(this.dir==0){
+                    if((col+1)<this.map.maxCols){
+                        return this.map.maps[row][col+1]==0;
+                    }else{
+                        return false;
+                    }
+                }
+
+                //left
+                if(this.dir==1){
+                    if((col-1)>=0){
+                        return this.map.maps[row][col-1]==0;
+                    }else{
+                        return false;
+                    }
+                }
+
+                //up
+                if(this.dir==2){
+                    if((row-1)>=0){
+                        return this.map.maps[row-1][col]==0;
+                    }else{
+                        return false;
+                    }
+                }
+
+                //down
+                if(this.dir==3){
+                    if((row+1)<this.map.maxRows){
+                        return this.map.maps[row+1][col]==0;
+                    }else{
+                        return false;
+                    }
+                }
+            };
+
+            Tank.prototype.update=function(monitor,delta){
+                this.updateDir(monitor);
+                if(this.moving && this.checkCollisions()){
+                    var dis=this.map.cSize;//Math.ceil(this.speed*delta*60/1000);
+                    if(this.dir==0){                 
+                        this.x+=dis;
+                        //x+;
+                    }else if(this.dir==1){
+                        this.x-=dis;
+                        //x-
+                    }else if(this.dir==2){
+                        this.y-=dis;
+                        //y-
+                    }else if(this.dir==3){
+                        this.y+=dis;
+                        //y+
+                    }
+                }
             };
 
             function Game(node){
                 var w=624;
                 var h=624;
                 this.node=node;
+                this.win=window;
                 this.ctx=node.getContext("2d");                
                 this.handler=null;
                 this.prevTime=0;
                 this.keyMonitor=new KeyMonitor();
-                this.map=new Map(w,h,w/26);
-                this.hero=new Tank(w/26*9,24*w/26,48);
+                this.cSize=w/26;
+                this.map=new Map(w,h,this.cSize);
+                this.hero=new Tank(this.cSize*9,24*this.cSize,this.cSize,this.map);
                 this.init=function(){
                     this.bindMouseDown=(function(scope){
                         var self=scope;
@@ -109,15 +212,17 @@
                     
                     this.bindKeyDown=(function(scope){
                         var self=scope;
-                        return function(e){
+                        return function(e){                            
                             self.onKeyDown.call(self,e);
+                            e.preventDefault();
                         };
                     })(this);
 
                     this.bindKeyUp=(function(scope){
                         var self=scope;
-                        return function(e){
+                        return function(e){                            
                             self.onKeyUp.call(self,e);
+                            e.preventDefault();
                         };
                     })(this);
 
@@ -164,8 +269,8 @@
                     this.node.addEventListener("mousedown",this.bindMouseDown);
                     this.node.addEventListener("mouseup",this.bindMouseUp)
                     this.node.addEventListener("mousemove",this.bindMouseMove);
-                    this.node.addEventListener("keyup",this.bindKeyUp);
-                    this.node.addEventListener("keydown",this.bindKeyDown);
+                    this.win.addEventListener("keyup",this.bindKeyUp,true);
+                    this.win.addEventListener("keydown",this.bindKeyDown,true);
                 };
                 this.getCursorPoint=function(e){
                     return {x:e.offsetX,y:e.offsetY};
@@ -184,7 +289,7 @@
                     var pos=this.getCursorPoint(e);                    
                 };
 
-                this.onKeyDown=function(e){
+                this.onKeyDown=function(e){                    
                     this.keyMonitor.onKeyDown(e);
                 };
 
@@ -198,6 +303,7 @@
                     this.ctx.clearRect(0,0,w,h);
                     this.map.draw(this.ctx);
                     this.hero.draw(this.ctx);
+                    this.hero.update(this.keyMonitor,Math.floor(now-this.prevTime));
                     this.prevTime=now;
                     this.handler=window.requestAnimationFrame(this.mainLoop);
                 };
