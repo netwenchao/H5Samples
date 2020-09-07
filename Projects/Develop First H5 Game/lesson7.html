@@ -12,22 +12,59 @@
         <canvas id="cav" width="320" height="480">            
         </canvas>
         <script type="text/javascript">            
-            function Bricks(w,h,r,c){
+            function Bricks(w,h,r,c,owner){
                 this.w=w||0;
                 this.h=h||0;
                 this.rows=r;
                 this.cols=c;
                 this.colors=['#9d9d9d', '#f80207', '#feff01', '#0072ff', '#fc01fc', '#03fe03'];
+                this.cellW=this.w/this.rows;
+                this.cellH=24;
                 this.debug=true;
+                this.owner=owner;                
+                this.blocks=[];
                 this.init=function(){
-                    
+                    this.blocks=[];
+                    for(var r=0;r<this.rows;r++){
+                        this.blocks[r]=[];
+                        for(var c=0;c<this.cols;c++){
+                            this.blocks[r].push(1);
+                        }
+                    }
                 };
-                this.update=function(delta){
 
+                this.update=function(delta){
                 };
+
                 this.draw=function(ctx){
-                    ctx.fillStyle="#333333";
-                    ctx.fillRect(0,0,this.winW,this.winH);
+                    ctx.fillStyle="#E1E1E1";
+                    ctx.fillRect(0,0,this.owner.w,this.owner.h);
+                    for(var r=0;r<this.rows;r++){                        
+                        ctx.strokeStyle="#666666";
+                        ctx.fillStyle=this.colors[r%this.colors.length];
+                        for(var c=0;c<this.cols;c++){
+                            if(this.blocks[r][c]){
+                                ctx.beginPath();
+                                ctx.rect(c*this.cellW,r*this.cellH,this.cellW,this.cellH);
+                                ctx.stroke();
+                                ctx.closePath();
+                                ctx.fill();
+                            }
+                        }
+                    }
+                };
+
+                this.isCollisionWith=function(objRect){
+                    var iRow=Math.floor(objRect.y/this.cellH);
+                    var iCell=Math.floor(objRect.x/this.cellW);
+                    if(objRect.y>=this.cellH*iRow && (objRect.y<=this.cellH*iRow+this.h) 
+                        && objRect.x>=this.cellW*iCell && objRect.x<=(this.cellW*iCell+this.w)
+                        && iRow>=0 && iRow<this.rows && iCell>=0 && iCell<this.cols
+                        && this.blocks[iRow][iCell]){
+                        this.blocks[iRow][iCell]=0;
+                        return true;
+                    }
+                    return false;
                 };
             }
             
@@ -58,6 +95,20 @@
                 this.dx=dx||0;
                 this.dy=dy||0;
                 this.owner=owner;
+                this.getRect=function(){
+                    return {
+                        x:this.x-this.r,
+                        y:this.y-this.r,
+                        w:this.r,
+                        h:this.r
+                    };
+                };
+                this.stop=function(ctx){
+                    this.dx=0;
+                    this.dy=0;
+                    this.y=this.owner.h-this.r;
+                    this.draw(ctx);
+                };
             }
 
             Ball.prototype.draw=function(ctx){
@@ -68,15 +119,39 @@
                 ctx.closePath();
             };
 
-            Ball.prototype.update=function(delta){
-                this.x+=this.dx*delta;
-                this.y+=this.dy*delta;
-                if(this.x>=this.owner.w-this.r || this.x<=0){
-                    this.dx*=-1;
+            Ball.prototype.update=function(delta){                
+                this.x+=this.dx*delta/1000;
+                this.y+=this.dy*delta/1000;
+                if(this.x>this.owner.w-this.r){
+                    this.dx=-1*Math.abs(this.dx);
                 }
 
-                if(this.y>=this.owner.h-this.r || this.y<=0){
-                    this.dy*=-1;
+                if(this.x<this.r){
+                    this.dx=Math.abs(this.dx);
+                }
+
+                if(this.y>(this.owner.h-this.r)){
+                    this.dy=-1*Math.abs(this.dy);
+                }
+
+                if(this.y<this.r){
+                    this.dy=Math.abs(this.dy);
+                }
+                
+                if(this.x<this.r){
+                    this.x=this.r;
+                }
+
+                if(this.x>(this.owner.w-this.r)){
+                    this.x=this.owner.w-this.r;
+                }
+
+                if(this.y<this.r){
+                    this.y=this.r;
+                }
+
+                if(this.y>(this.owner.y-this.r)){
+                    this.y=this.owner.h-this.r;
                 }
             };
 
@@ -111,6 +186,13 @@
                     ctx.stroke();
                     ctx.closePath();
                 };
+
+                this.isCollisionWith=function(rect){
+                    return rect.x>=this.x 
+                        && rect.x<=this.w+this.x
+                        && rect.y>=this.y
+                        && rect.y<=this.h+this.y;
+                };
             }            
 
             function Game(node){
@@ -118,14 +200,28 @@
                 this.h=480;
                 var BallSize=8;
                 var boardY=this.h-60;
-                var boardW=64;
+                var boardW=this.w;
                 this.node=node;
                 this.win=window;
-                this.ctx=node.getContext("2d");
                 this.handler=null;
                 this.prevTime=0;
+                this.time=0;
+                this.lastTime=localStorage.getItem("lastTime");
+                this.lastScore=localStorage.getItem("lastScore");
+                this.score=0;
+                this.running=false;
+
+                this.ctx=node.getContext("2d");
+                this.audios=[];                
+                this.audios[0]=new Audio("media/snd1.wav");
+                this.audios[1]=new Audio("media/snd2.wav");
+                this.audios[2]=new Audio("media/snd3.wav");
+                this.audios[0].volume=0.9;
+                this.audios[1].volume=0.9;
+                this.audios[2].volume=0.9;
+
                 this.keyMonitor=new KeyMonitor();
-                this.bricks=new Bricks(this.w,this.h);
+                this.bricks=new Bricks(this.w,this.h,4,6,this);
                 this.isLeftPressed=function(){
                     return  this.keyMonitor.keyPressed(this.keyMonitor.KeyLeft);
                 };
@@ -183,12 +279,13 @@
                             self.update.call(self,Math.floor(now-self.prevTime));
                             self.draw.call(self);
                             self.prevTime=now;
-                            self.handler=window.requestAnimationFrame(self.mainLoop);
+                            if(self.running){
+                                self.handler=window.requestAnimationFrame(self.mainLoop);
+                            }
                         }
                     })(this);
                     this.regEvents();
-                    this.prevTime=performance.now();
-                    this.mainLoop();
+                    //this.mainLoop();
                 }
 
                 this.regEvents=function(){
@@ -217,16 +314,50 @@
 
                 this.onKeyDown=function(e){                    
                     this.keyMonitor.onKeyDown(e);
+                    if(e.keyCode==32 && !this.running){
+                        this.reStart();
+                    }
                 };
 
                 this.onKeyUp=function(e){
                     this.keyMonitor.onKeyUp(e);
                 };
 
+                this.reStart=function(){
+                    this.ball.dx=300;
+                    this.ball.dy=-300;
+                    this.running=true;
+                    this.bricks.init();
+                    this.prevTime=performance.now();
+                    this.mainLoop();
+                };
+
                 this.update=function(delta){
+                    this.time+=delta;
                     this.ball.update(delta);
                     this.bricks.update(delta);
                     this.padd.update(delta);
+                    if(this.bricks.isCollisionWith(this.ball.getRect())){
+                        this.ball.dy=-this.ball.dy;
+                        this.score++;
+                        this.audios[0].play();
+                    }
+                    
+                    if(this.padd.isCollisionWith(this.ball.getRect())){
+                        this.ball.dy=-1*this.ball.dy;
+                        this.ball.dx=-1*this.ball.dx;
+                        if(this.ball.y>=this.padd.y-this.ball.r){
+                            this.ball.y=this.padd.y-this.ball.r;
+                        }
+                    }
+
+                    if(this.ball.y>=(this.h-this.ball.r)){
+                        this.ball.stop(this.ctx);
+                        localStorage.setItem("lastTime",Math.floor(this.time/1000));
+                        localStorage.setItem("lastScore",this.score);
+                        this.audios[1].play();
+                        this.running=false;
+                    }
                 };
 
                 this.draw=function(ctx){
@@ -237,6 +368,16 @@
                     this.bricks.draw(this.ctx);
                     this.ball.draw(this.ctx);
                     this.padd.draw(this.ctx);
+
+                    this.ctx.font="16px Verdana";
+                    this.fillStyle="#FFFFFF";
+                    var s=Math.floor(this.time/1000);
+                    if(s<10){
+                        this.ctx.fillText("Time:0"+Math.floor(s),220,380);
+                    }else{
+                        this.ctx.fillText("Time:"+Math.floor(s),220,380);
+                    }
+                    this.ctx.fillText("Score:"+(this.score<10?"0"+this.score:this.score),220,400);
                 };
             }
             var game=new Game(document.getElementById("cav"));
