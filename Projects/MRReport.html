@@ -1,5 +1,8 @@
 <html>
     <head>
+        <style type="text/css">
+        td,th{border:solid 1px #000;}
+        </style>
         <script type="text/javascript" src="jquery-1.7.2.min.js"></script>
         <script type="text/javascript">
             var report={
@@ -209,16 +212,18 @@
                 console.log(proData);
                 console.log(staffs);
                 console.log(weeks);
-                rslt.header.push("<tr><th rowspan='2'>设备</th>");
+                var row1=["<tr><th rowspan=\"2\">设备</th>"];
+                var row2=["<tr>"];
                 for(var i=0;i<staffs.items.length;i++){
-                    rslt.header.push("<th colspan=\"{0}\">{1}</th>".format(weeks.items.length,staffs.items[i]));
+                    row1.push("<th colspan=\"{0}\">{1}</th>".format(weeks.items.length,staffs.items[i]));
+                    for(var j=0;j<weeks.items.length;j++){
+                        row2.push("<th>{0}</th>".format(weeks.items[j]));
+                    }
                 }
-                rslt.header.push("</tr>");
-                rslt.header.push("<tr><th rowspan='2'>设备</th>");
-                for(var i=0;i<staffs.items.length;i++){
-                    rslt.header.push("<th colspan=\"{0}\">{1}</th>".format(weeks.items.length,staffs.items[i]));
-                }
-                rslt.header.push("</tr>");
+                row1.push("</tr>");
+                row2.push("</tr>");
+                rslt.header.push(row1.join("\r\n"));
+                rslt.header.push(row2.join("\r\n"));
                 rslt.showOutPut();
             };
         </script>
