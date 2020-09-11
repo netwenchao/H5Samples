@@ -1,0 +1,232 @@
+<html>
+    <head>
+        <script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+        <script type="text/javascript">
+            var report={
+                "Id": "bd377d50-16a2-4518-91a3-d31fee0f802a",
+                "Name": "MR-技师",
+                "Code": "MR-JS",
+                "GroupFields": [{
+                    "TemplateId": null,
+                    "FieldName": "DeviceId",
+                    "Type": "String",
+                    "GroupType": "0",
+                    "Display": "设备",
+                    "IncludeNull": false,
+                    "DisplayName": null,
+                    "RangeFieldData": null
+                }, {
+                    "TemplateId": null,
+                    "FieldName": "ExecDoctorId",
+                    "Type": "String",
+                    "GroupType": "0",
+                    "Display": "拍片医师",
+                    "IncludeNull": false,
+                    "DisplayName": null,
+                    "RangeFieldData": null
+                }, {
+                    "TemplateId": null,
+                    "FieldName": "StatisticTimeParts.WeekDayType",
+                    "Type": "Int32",
+                    "GroupType": "0",
+                    "Display": "周类型",
+                    "IncludeNull": false,
+                    "DisplayName": null,
+                    "RangeFieldData": null
+                }],
+                "FilterFields": [{
+                    "FieldName": "ModalityId",
+                    "Type": "String",
+                    "Display": "设备类型"
+                }],
+                "AggregateFields": [{
+                    "FieldName": "OrderCount",
+                    "Type": "Int32",
+                    "Display": "数量"
+                }],
+                "IsPublic": false,
+                "IsHidden": false,
+                "CreateDateTime": null,
+                "UpdateDateTime": null,
+                "CreateDoctorId": "5dda0a0a-b947-49fc-b13e-34a068bfba21",
+                "CategoryId": "aa36e59f-8f52-456f-8808-da28d0e45c81",
+                "FilterParams": "[{\"FieldName\":\"ModalityId\",\"ExactValues\":[\"15a0f0cb-6b44-45fe-a9d5-54d7464c1e4e\"]}]",
+                "DefaultTimeField": "RegisterTime",
+                "SysMatchFields": null,
+                "EnableRowConversion": true
+            };
+            var data =[{
+                "Result": true,
+                "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b0e", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e08", "0"],
+                "Count": 6,
+                "AggregateResult": [{
+                    "Key": "OrderCount",
+                    "Value": "6"
+                }],
+                "Message": null
+            }, {
+                "Result": true,
+                "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b0e", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e08", "1"],
+                "Count": 2,
+                "AggregateResult": [{
+                    "Key": "OrderCount",
+                    "Value": "2"
+                }],
+                "Message": null
+            }, {
+                "Result": true,
+                "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b0e", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e08", "2"],
+                "Count": 2,
+                "AggregateResult": [{
+                    "Key": "OrderCount",
+                    "Value": "2"
+                }],
+                "Message": null
+            },{
+                "Result": true,
+                "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b01", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e08", "0"],
+                "Count": 6,
+                "AggregateResult": [{
+                    "Key": "OrderCount",
+                    "Value": "6"
+                }],
+                "Message": null
+            }, {
+                "Result": true,
+                "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b01", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e08", "1"],
+                "Count": 2,
+                "AggregateResult": [{
+                    "Key": "OrderCount",
+                    "Value": "2"
+                }],
+                "Message": null
+            }, {
+                "Result": true,
+                "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b01", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e08", "2"],
+                "Count": 2,
+                "AggregateResult": [{
+                    "Key": "OrderCount",
+                    "Value": "2"
+                }],
+                "Message": null
+            },{
+                "Result": true,
+                "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b01", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e07", "0"],
+                "Count": 6,
+                "AggregateResult": [{
+                    "Key": "OrderCount",
+                    "Value": "6"
+                }],
+                "Message": null
+            }, {
+                "Result": true,
+                "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b01", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e07", "1"],
+                "Count": 2,
+                "AggregateResult": [{
+                    "Key": "OrderCount",
+                    "Value": "2"
+                }],
+                "Message": null
+            }, {
+                "Result": true,
+                "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b01", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e07", "2"],
+                "Count": 2,
+                "AggregateResult": [{
+                    "Key": "OrderCount",
+                    "Value": "2"
+                }],
+                "Message": null
+            }];
+
+            String.prototype.format=function(){
+                var arg=arguments;
+                return this.replace(/\{(\d+)\}/ig,function(match,idx){
+                    var i=parseInt(idx);
+                    if(!isNaN(i)){
+                        return i<arg.length?arg[i]:"";
+                    }
+                    return "";
+                });
+            };
+
+            function renderReport(){
+                var rslt={
+                    header:[],
+                    body:[],
+                    foot:[],
+                    showOutPut:function(){
+                        $("#output").html("<table><thead>{0}</thead><tbody>{1}</tbody><tfoot>{2}</tfoot></table>".format(this.header.join("\r\n"),this.body.join("\r\n"),this.foot.join("\r\n")));
+                    }
+                };
+
+                var cols={
+                    Device:{
+                        Name:"DeviceId",
+                        Idx:2
+                    },
+                    Staff:{
+                        Name:"ExecDoctorId",
+                        Idx:0
+                    },
+                    WeekDay:{
+                        Name:"StatisticTimeParts.WeekDayType",
+                        Idx:1
+                    }
+                };
+                var keyPrefix="$";
+                var proData={};
+                var staffs={};
+                var weeks={};
+                /*
+                    - adapt data                    
+                */
+                $(data).each(function(){
+                    var curObj=proData;
+                    for(var i=0;i<this.GroupFields.length;i++){
+                        var key=keyPrefix+this.GroupFields[i];
+                        if(i==1 && !staffs.hasOwnProperty(key)){                            
+                            !staffs["items"] && (staffs["items"]=[]);
+                            staffs["items"].push(this.GroupFields[i]);
+                            staffs[key]=staffs["items"].length-1;
+                        }
+
+                        if(i==2 && !weeks.hasOwnProperty(key)){                            
+                            !weeks["items"] && (weeks["items"]=[]);
+                            weeks["items"].push(this.GroupFields[i]);
+                            weeks[key]=weeks["items"].length-1;
+                        }
+
+                        if(!curObj.hasOwnProperty(key)){
+                            if(i==(this.GroupFields.length-1)){
+                                curObj[key]=this.Count;
+                            }else{
+                                curObj[key]={};
+                            }
+                        }                        
+                        curObj=curObj[key];
+                    }
+                });
+                console.log(proData);
+                console.log(staffs);
+                console.log(weeks);
+                rslt.header.push("<tr><th rowspan='2'>设备</th>");
+                for(var i=0;i<staffs.items.length;i++){
+                    rslt.header.push("<th colspan=\"{0}\">{1}</th>".format(weeks.items.length,staffs.items[i]));
+                }
+                rslt.header.push("</tr>");
+                rslt.header.push("<tr><th rowspan='2'>设备</th>");
+                for(var i=0;i<staffs.items.length;i++){
+                    rslt.header.push("<th colspan=\"{0}\">{1}</th>".format(weeks.items.length,staffs.items[i]));
+                }
+                rslt.header.push("</tr>");
+                rslt.showOutPut();
+            };
+        </script>
+    </head>
+    <body>
+        <div id="output"></div>
+        <script type="text/javascript">
+        renderReport();
+        </script>
+    </body>
+</html>

@@ -1,0 +1,420 @@
+<html>
+    <head>
+        <style type="text/css">
+        #cav{border:solid 1px #E1E1E1;}
+        @font-face {
+            font-family: "DS-Digital";
+            src: url("fonts/Ds-digib.ttf");
+        }
+        </style>
+    </head>
+    <body>
+        <canvas id="cav" width="480" height="320">            
+        </canvas>
+        <p>
+            <a  href="https://www.script-tutorials.com/html5-game-development-lesson-9/" class="stuts">
+                Back to original tutorial
+            </a>
+        </p>
+        <script type="text/javascript">
+            function Enemy(x,y,w,h,speed,img,owner){
+                this.x=x||0;
+                this.y=y||0;
+                this.w=w||0;
+                this.h=h||0;
+                this.speed=speed||0;
+                this.img=img;
+                this.visible=true;
+                this.owner=owner;
+            }
+
+            Enemy.prototype.reset=function(x,y){
+                this.x=x||0;
+                this.y=y||0;
+                this.visible=true;
+            };
+
+            Enemy.prototype.draw=function(ctx){
+                if(this.visible){
+                    ctx.drawImage(this.img,0,0,128,128,this.x,this.y,this.w,this.h);
+                }
+            };
+
+            Enemy.prototype.update=function(delta){
+                if(this.visible){
+                    this.x+=Math.floor(delta*this.speed);
+                    if(this.x>this.owner.w){
+                        this.visible=false;
+                    }
+                }
+            };
+
+            function FireBall(x,y,w,h,speed,img,owner){
+                this.x=x||0;
+                this.y=y||0;
+                this.w=w||0;
+                this.h=h||0;
+                this.img=img;
+                this.speed=speed||0;
+                this.visible=true;
+                this.owner=owner;
+            }
+
+            FireBall.prototype.draw=function(ctx){
+                if(this.visible){
+                    ctx.drawImage(this.img,0,0,32,32,this.x,this.y,this.w,this.h);
+                }
+            };
+
+            FireBall.prototype.reset=function(x,y){
+                this.x=x||0;
+                this.y=y||0;
+                this.visible=true;
+            };
+
+            FireBall.prototype.update=function(delta){
+                if(this.visible){
+                    this.x+=Math.floor(delta*this.speed);
+                    if(this.x>this.owner.w){
+                        this.visible=false;
+                    }
+                }
+            };
+
+
+            function Dragon(x,y,w,h,img){
+                this.x=x;
+                this.y=y;
+                this.w=w;
+                this.h=h;
+                this.img=img;
+                this.dragging=false;
+                this.prevPos=null;
+                this.dir=0;
+                this.fIdx=0;
+                this.fdur=0;
+            }
+
+            Dragon.prototype.updateDir=function(xDiff,yDiff){
+                xDiff=Math.floor(xDiff);
+                yDiff=Math.floor(yDiff);
+                var dir=0;
+                if(xDiff<0) dir=dir|2;//left
+                if(yDiff<0) dir=dir|4;//top
+                if(xDiff>0) dir=dir|8;//right
+                if(yDiff>0) dir=dir|16;//bottom
+                
+                if(dir==2){
+                    this.dir=4;
+                    return;
+                }
+
+                if(dir==4){
+                    this.dir=6;
+                    return;
+                }
+
+                if(dir==8){
+                    this.dir=0;
+                    return;
+                }
+
+                if(dir==16){
+                    this.dir=2;
+                    return;
+                }
+
+                if(dir==24){
+                    this.dir=1;
+                    return;
+                }
+                
+                if(dir==18){
+                    this.dir=3;
+                    return;
+                }
+
+                if(dir==6){
+                    this.dir=5;
+                    return;
+                }
+
+                if(dir==12){
+                    this.dir=7;
+                    return;
+                }
+            };
+
+            Dragon.prototype.draw=function(ctx){
+                ctx.drawImage(this.img,0,0,256,256,this.x,this.y,this.w,this.h);
+            };
+            Dragon.prototype.containsPoint=function(p){
+                return p.x>=this.x 
+                    && p.x<=this.x+this.w
+                    && p.y<=this.y+this.h
+                    && p.y>=this.y;
+            };
+            Dragon.prototype.onMouseDown=function(pos){
+                if(this.containsPoint(pos)){
+                    this.dragging=true;
+                    this.setPos(pos);
+                }
+            };
+
+            Dragon.prototype.setPos=function(pos){
+                this.x=pos.x;
+                this.y=pos.y;                
+            };
+
+            Dragon.prototype.onMouseMove=function(pos){
+                if(this.dragging){                    
+                    this.setPos(pos);                    
+                }
+                //Change pos
+                var prev=this.prevPos;
+                if(prev!=null){
+                    this.updateDir(pos.x-prev.x,pos.y-prev.y);
+                }
+                this.prevPos=pos;
+            }
+            Dragon.prototype.onMouseUp=function(pos){
+                this.dragging=false;
+            }
+
+            Dragon.prototype.update=function(delta){
+                this.fdur+=Math.floor(delta);
+                if(this.fdur>200){
+                    this.fIdx++;
+                }
+                this.fIdx=this.fIdx>9?0:this.fIdx;
+            }
+
+            Dragon.prototype.draw=function(ctx){
+                ctx.drawImage(this.img,this.fIdx*75,this.dir*70,this.w,this.h,this.x-this.w/2,this.y-this.h/2,this.w,this.h);
+            };
+
+            var util={
+                rand:function(min,max){
+                    return Math.random()*max+min;
+                }
+            };
+
+            function Game(node){
+                this.win=window;
+                this.w=480;
+                this.h=320;
+                this.score=0;
+                this.node=node;
+                this.ctx=node.getContext("2d");                
+                this.handler=null;
+                this.enemyGenHandler=null;
+                this.prevTime=0;
+                this.ballSpeed=2;
+                this.balls=[];
+                this.enemies=[];                
+
+                this.bgImage=new Image();
+                this.bgImage.src="images/hell.jpg";
+                this.spriteImg=new Image();
+                this.spriteImg.src="images/dragon.gif";
+                this.enemyImg=new Image();
+                this.enemyImg.src="images/enemy.png";
+
+                this.ballImage=new Image();
+                this.ballImage.src="images/fireball.png";
+
+                this.dragonSound=new Audio("media/dragon.wav");
+                this.dragonSound.volume=0.9;
+
+                this.explodeSound=new Audio("media/explode1.wav");
+                this.explodeSound.volume=0.9;
+                this.explodeSound2 = new Audio('media/explosion.wav');
+                this.explodeSound2.volume=0.9;
+
+                this.wingSound=new Audio("media/wings.wav");
+                this.wingSound.volume=0.9;
+                this.wingSound.addEventListener("ended",function(){
+                    this.currentTime=0;
+                    this.play();
+                },false);
+                this.wingSound.play();
+
+                this.bgPos=0;
+                this.init=function(){                    
+                    this.hero=new Dragon(this.w/2,this.h/3,75,70,this.spriteImg);
+
+                    this.bindMouseDown=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseDown.call(self,e);
+                        }
+                    })(this);
+
+                    this.bindMouseMove=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseMove.call(self,e);
+                        }
+                    })(this);
+
+                    this.bindKeyUp=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onKeyUp.call(self,e);
+                        }
+                    })(this);
+
+                    this.bindMouseUp=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseUp.call(self,e);
+                        }
+                    })(this);
+
+                    this.genEnemy=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.addEnemy.call(self,e);
+                        }
+                    })(this);
+
+                    this.enemyGenHandler=setInterval(this.genEnemy,3000);
+
+                    this.mainLoop=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            window.cancelAnimationFrame(self.handler);
+                            var now=performance.now();
+                            self.update.call(self,now-self.prevTime);
+                            self.draw(self.ctx);
+                            self.prevTime=now;
+                            self.handler=window.requestAnimationFrame(self.mainLoop);
+                        }
+                    })(this);
+
+                    this.regEvents();                    
+                    this.mainLoop();
+                    this.addEnemy();
+                    this.prevTime=performance.now();
+                }
+
+                this.regEvents=function(){
+                    this.node.addEventListener("mousedown",this.bindMouseDown);
+                    this.node.addEventListener("mouseup",this.bindMouseUp)
+                    this.node.addEventListener("mousemove",this.bindMouseMove);                    
+                    this.win.addEventListener("keyup",this.bindKeyUp,true);
+                };
+                this.getCursorPoint=function(e){
+                    return {x:e.offsetX,y:e.offsetY};
+                }
+
+                this.onMouseDown=function(e){
+                    var pos=this.getCursorPoint(e);
+                    this.hero.onMouseDown(pos);
+                };
+
+                this.onMouseMove=function(e){
+                    var pos=this.getCursorPoint(e);
+                    this.hero.onMouseMove(pos);
+                };
+
+                this.onMouseUp=function(e){
+                    this.selectNode=null;
+                    var pos=this.getCursorPoint(e);
+                    this.hero.onMouseUp(pos);
+                    this.dragonSound.currentTime = 0;
+                    this.dragonSound.play();
+                };
+
+                this.onKeyUp=function(e){
+                    console.log(e.keyCode);
+                    if(e.code=="Space"){
+                        this.genBall();
+                        e.preventDefault();
+                    }
+                };
+
+                this.genBall=function(){
+                    for(var i in this.balls){
+                        if(this.balls[i] && !this.balls[i].visible){
+                            this.balls[i].reset(this.hero.x+this.hero.w,this.y+this.h/2);
+                            return;
+                        }
+                    }
+                    this.balls.push(new FireBall(this.hero.x+this.hero.w,this.y+this.h/2,32,32,4,this.ballImage,this));
+                };
+
+                this.checkCollision=function(){
+                    for(var i in this.balls){
+                        if(this.balls[i] && this.balls[i].visible){
+                            for(var e in this.enemies){
+                                if(this.enemies[e] && this.enemies[e].visible){
+                                    var ball=this.balls[i];
+                                    var enemy=this.enemies[e];
+                                    if(ball.x+ball.w>enemy.x && ball.y+ball.h>enemy.y && ball.y+ball.h<enemy.y+enemy.h){
+                                        enemy.visible=false;
+                                        ball.visible=false;
+                                        this.score++;
+                                        this.explodeSound2.currentTime=0;
+                                        this.explodeSound2.play();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                this.update=function(delta){
+                    this.bgPos-=4;
+                    if(this.bgPos<=0){
+                        this.bgPos=1045;
+                    }                    
+                    this.hero.update(delta);
+                    for(var i in this.enemies){
+                        if(this.enemies[i]){
+                            this.enemies[i].update(delta);
+                        }
+                    }
+
+                    for(var i in this.balls){
+                        if(this.balls[i]){
+                            this.balls[i].update(delta);
+                        }
+                    }
+                };
+
+                this.draw=function(){
+                    this.ctx.clearRect(0,0,this.w,this.h);
+                    this.ctx.drawImage(this.bgImage,this.bgPos,0,1024,768,0,0,this.w,this.h);
+                    this.hero.draw(this.ctx);
+
+                    for(var i in this.enemies){
+                        if(this.enemies[i]){
+                            this.enemies[i].draw(this.ctx);
+                        }
+                    }
+
+                    for(var i in this.balls){
+                        if(this.balls[i]){
+                            this.balls[i].draw(this.ctx);
+                        }
+                    }
+                };
+
+                this.addEnemy=function(){
+                    clearInterval(this.enemyGenHandler);
+                    for(var i in this.enemies){
+                        if(this.enemies[i] && !this.enemies[i].visible){
+                            this.enemies[i].reset(this.w-this.enemies[i].w,util.rand(0,this.h-this.enemies[i].h));
+                            return;
+                        }
+                    }
+                    this.enemies.push(new Enemy(this.w-128,util.rand(0,this.h-128),128,128,4,this.enemyImg,this));
+                    this.enemyGenHandler=setInterval(this.genEnemy,util.rand(5000,1000));
+                };
+            }
+            var game=new Game(document.getElementById("cav"));
+            game.init();
+        </script>
+    </body>
+</html>

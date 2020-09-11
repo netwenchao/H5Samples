@@ -17,6 +17,19 @@ namespace JWT
                 "resource": "http://172.31.3.156/report/pacsentry.aspx?accessionNumber=CR0001213&mode=mobile"
                 }
             */
+            var uri=new Uri("amqp://guest:guest@127.0.0.1/RIS?test=s#frag");
+            Console.WriteLine("Scheme:"+uri.Scheme);
+            Console.WriteLine("Host:"+uri.Host);
+            Console.WriteLine("Port:"+uri.Port);
+            Console.WriteLine("UserInfo:"+uri.UserInfo);
+            Console.WriteLine("PathAndQuery:"+uri.PathAndQuery);
+            Console.WriteLine("Query:"+uri.Query);
+            Console.WriteLine("AbsolutePath:"+uri.AbsolutePath);
+            Console.WriteLine("LocalPath:"+uri.LocalPath);
+            Console.WriteLine("Fragment:"+uri.Fragment);
+            Console.WriteLine("Segments:"+uri.Segments);
+
+
             var s=Enumerable.Range(0,9);
             foreach(var a in s){
                 Console.WriteLine(a);

@@ -1,0 +1,363 @@
+<html>
+    <head>
+        <style type="text/css">
+        #cav{border:solid 1px #E1E1E1;}
+        @font-face {
+            font-family: "DS-Digital";
+            src: url("fonts/Ds-digib.ttf");
+        }
+        </style>
+        <script src="../libs/protoclass.js"></script>
+        <script src="../libs/jquery-1.6.min.js"></script>
+        <!--box2djs-->
+        <script src='../libs//box2d/common/b2Settings.js'></script>
+        <script src='../libs//box2d/common/math/b2Vec2.js'></script>
+        <script src='../libs//box2d/common/math/b2Mat22.js'></script>
+        <script src='../libs//box2d/common/math/b2Math.js'></script>
+        <script src='../libs//box2d/collision/b2AABB.js'></script>
+        <script src='../libs//box2d/collision/b2Bound.js'></script>
+        <script src='../libs//box2d/collision/b2BoundValues.js'></script>
+        <script src='../libs//box2d/collision/b2Pair.js'></script>
+        <script src='../libs//box2d/collision/b2PairCallback.js'></script>
+        <script src='../libs//box2d/collision/b2BufferedPair.js'></script>
+        <script src='../libs//box2d/collision/b2PairManager.js'></script>
+        <script src='../libs//box2d/collision/b2BroadPhase.js'></script>
+        <script src='../libs//box2d/collision/b2Collision.js'></script>
+        <script src='../libs//box2d/collision/Features.js'></script>
+        <script src='../libs//box2d/collision/b2ContactID.js'></script>
+        <script src='../libs//box2d/collision/b2ContactPoint.js'></script>
+        <script src='../libs//box2d/collision/b2Distance.js'></script>
+        <script src='../libs//box2d/collision/b2Manifold.js'></script>
+        <script src='../libs//box2d/collision/b2OBB.js'></script>
+        <script src='../libs//box2d/collision/b2Proxy.js'></script>
+        <script src='../libs//box2d/collision/ClipVertex.js'></script>
+        <script src='../libs//box2d/collision/shapes/b2Shape.js'></script>
+        <script src='../libs//box2d/collision/shapes/b2ShapeDef.js'></script>
+        <script src='../libs//box2d/collision/shapes/b2BoxDef.js'></script>
+        <script src='../libs//box2d/collision/shapes/b2CircleDef.js'></script>
+        <script src='../libs//box2d/collision/shapes/b2CircleShape.js'></script>
+        <script src='../libs//box2d/collision/shapes/b2MassData.js'></script>
+        <script src='../libs//box2d/collision/shapes/b2PolyDef.js'></script>
+        <script src='../libs//box2d/collision/shapes/b2PolyShape.js'></script>
+        <script src='../libs//box2d/dynamics/b2Body.js'></script>
+        <script src='../libs//box2d/dynamics/b2BodyDef.js'></script>
+        <script src='../libs//box2d/dynamics/b2CollisionFilter.js'></script>
+        <script src='../libs//box2d/dynamics/b2Island.js'></script>
+        <script src='../libs//box2d/dynamics/b2TimeStep.js'></script>
+        <script src='../libs//box2d/dynamics/contacts/b2ContactNode.js'></script>
+        <script src='../libs//box2d/dynamics/contacts/b2Contact.js'></script>
+        <script src='../libs//box2d/dynamics/contacts/b2ContactConstraint.js'></script>
+        <script src='../libs//box2d/dynamics/contacts/b2ContactConstraintPoint.js'></script>
+        <script src='../libs//box2d/dynamics/contacts/b2ContactRegister.js'></script>
+        <script src='../libs//box2d/dynamics/contacts/b2ContactSolver.js'></script>
+        <script src='../libs//box2d/dynamics/contacts/b2CircleContact.js'></script>
+        <script src='../libs//box2d/dynamics/contacts/b2Conservative.js'></script>
+        <script src='../libs//box2d/dynamics/contacts/b2NullContact.js'></script>
+        <script src='../libs//box2d/dynamics/contacts/b2PolyAndCircleContact.js'></script>
+        <script src='../libs//box2d/dynamics/contacts/b2PolyContact.js'></script>
+        <script src='../libs//box2d/dynamics/b2ContactManager.js'></script>
+        <script src='../libs//box2d/dynamics/b2World.js'></script>
+        <script src='../libs//box2d/dynamics/b2WorldListener.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2JointNode.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2Joint.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2JointDef.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2DistanceJoint.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2DistanceJointDef.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2Jacobian.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2GearJoint.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2GearJointDef.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2MouseJoint.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2MouseJointDef.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2PrismaticJoint.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2PrismaticJointDef.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2PulleyJoint.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2PulleyJointDef.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2RevoluteJoint.js'></script>
+        <script src='../libs//box2d/dynamics/joints/b2RevoluteJointDef.js'></script>
+    </head>
+    <body>
+        <canvas id="cav" width="800" height="600">            
+        </canvas>
+        <p>
+            <a href="https://www.script-tutorials.com/html5-game-development-lesson-8/" class="stuts">Link</span></a>
+        </p>
+        <script type="text/javascript">
+            var word=null;
+            function getRand(x,y){
+                return Math.floor(Math.random()*y+x);
+            }
+            function KeyMonitor(){
+                this.status={};
+                this.onKeyDown=function(e){
+                    this.status[e.keyCode]=true;
+                };
+
+                this.onKeyUp=function(e){                    
+                    this.status[e.keyCode]=false;
+                };
+
+                this.keyPressed=function(code){
+                    return this.status.hasOwnProperty(code) && this.status[code];
+                };
+            }
+
+            KeyMonitor.prototype.KeyLeft=37;
+            KeyMonitor.prototype.KeyUp=38;
+            KeyMonitor.prototype.KeyRight=39;
+            KeyMonitor.prototype.KeyDown=40;
+
+            function createWord(){
+                var worldBox=new b2AABB();//size of world
+                worldBox.minVertex.Set(-1000,-1000);
+                worldBox.maxVertex.Set(1000,1000);
+                
+                //gravity
+                var g=new b2Vec2(0,200);
+                //ignore sleeping obj
+                var doSleep=false;
+                //create word with size,gravity and sleep obj param.
+                return new b2World(worldBox,g,doSleep);
+            }
+
+            function createGround(x,y,width,height,rotation){
+                var groundSd=new b2BoxDef();
+                groundSd.extents.Set(width,height);
+                groundSd.restitution=0.4;
+
+                var groundBd=new b2BodyDef();
+                groundBd.AddShape(groundSd);
+                groundBd.position.Set(x,y);
+                groundBd.rotation=rotation*Math.PI/180;
+                return word.CreateBody(groundBd);
+            }
+
+            function createBoxAt(x,y,w,h){
+                var box=new b2BoxDef();
+                box.density=1.0;
+                box.friction=1.0;
+                box.restitution=0.5;
+                box.extents.Set(w,h);
+
+                var bodyDef=new b2BodyDef();
+                bodyDef.AddShape(box);
+                bodyDef.position.Set(x,y);
+                return word.CreateBody(bodyDef);
+            }
+
+            function createCircleAt(x,y,r){
+                var box=new b2CircleDef();
+                box.density=1.0;
+                box.friction=1.0;
+                box.restitution=0.5;
+                box.radius=r;
+
+                var bodyDef=new b2BodyDef();
+                bodyDef.AddShape(box);
+                bodyDef.position.Set(x,y);
+                return word.CreateBody(bodyDef);
+            }
+
+            function addObject(){
+                var tp=getRand(1,2);
+                var x=getRand(20,800);
+                var y=getRand(20,600);
+                console.log("x:"+x+",y:"+y);
+                var obj=null;
+                if(tp==1){
+                    createBoxAt(x,y,100,200);
+                }else{
+                    createCircleAt(x,y,getRand(100,200));
+                }
+            }
+
+            function drawWorld(world,ctx){
+                for(var b =word.m_bodyList;b!=null;b=b.m_next){
+                    for(var s=b.GetShapeList();s!=null;s=s.GetNext()){
+                        drawShape(s,ctx);
+                    }
+                }
+            }
+
+            function drawShape(shape,ctx){
+                ctx.strokeStyle="#FFFFFF";
+                ctx.fillStyle="#FFFFFF";
+                ctx.beginPath();
+                switch(shape.m_type){
+                    case b2Shape.e_circleShape:
+                        var pos=shape.m_position;
+                        var r=shape.m_radius;
+                        var segments=16;
+                        var theta=0;
+                        var dtheta=2*Math.PI/segments;
+                        ctx.moveTo(pos.x+r,pos.y);
+                        for(var i=0;i<segments;i++){
+                            var d=new b2Vec2(r*Math.cos(theta),r*Math.sin(theta));
+                            var v=b2Math.AddVV(pos,d);
+                            ctx.lineTo(v.x,v.y);
+                            theta+=dtheta;
+                        }
+                        ctx.lineTo(pos.x+r,pos.y);
+                        ctx.moveTo(pos.x,pos.y);
+                        var ax=shape.m_R.col1;
+                        var pos2=new b2Vec2(pos.x+r*ax.x,pos.y+r*ax.y);
+                        ctx.lineTo(pos2.x,pos2.y);
+                        break;
+                    case b2Shape.e_polyShape:
+                        var poly=shape;
+                        var tv=b2Math.AddVV(shape.m_position,b2Math.b2MulMV(poly.m_R, poly.m_vertices[0]));
+                        ctx.moveTo(tv.x, tv.y);
+                        for (var i = 0; i < poly.m_vertexCount; i++) {
+                            var v = b2Math.AddVV(poly.m_position, b2Math.b2MulMV(poly.m_R, poly.m_vertices[i]));
+                            ctx.lineTo(v.x, v.y);
+                        }
+                        ctx.lineTo(tv.x, tv.y);
+                        break;
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            function Game(node){
+                this.w=800;
+                this.h=600;                
+                this.node=node;
+                this.win=window;
+                this.handler=null;
+                this.prevTime=0;
+                this.score=0;
+                var iBorder=10;
+                this.running=true;
+                this.time=0;
+
+                this.ctx=node.getContext("2d");
+                this.keyMonitor=new KeyMonitor();
+                
+                this.init=function(){
+                    window.word =createWord();
+
+                    createGround(this.w / 2, this.h - iBorder, this.w / 2, iBorder, 0);
+                    // left border
+                    createGround(iBorder, this.h / 2, iBorder, this.h / 2, 0);
+                    // right border
+                    createGround(this.w - iBorder, this.h / 2, iBorder, this.h / 2, 0);
+                    this.bindMouseDown=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseDown.call(self,e);
+                        }
+                    })(this);
+
+                    this.bindMouseMove=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseMove.call(self,e);
+                        }
+                    })(this);
+
+                    this.bindMouseUp=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            self.onMouseUp.call(self,e);
+                        }
+                    })(this);
+                    
+                    this.bindKeyDown=(function(scope){
+                        var self=scope;
+                        return function(e){                            
+                            self.onKeyDown.call(self,e);
+                            e.preventDefault();
+                        };
+                    })(this);
+
+                    this.bindKeyUp=(function(scope){
+                        var self=scope;
+                        return function(e){                            
+                            self.onKeyUp.call(self,e);
+                            e.preventDefault();
+                        };
+                    })(this);
+
+                    this.mainLoop=(function(scope){
+                        var self=scope;
+                        return function(e){
+                            window.cancelAnimationFrame(self.handler);
+                            var now=performance.now();                            
+                            self.update.call(self,Math.floor(now-self.prevTime));
+                            self.draw.call(self);
+                            self.prevTime=now;                            
+                            if(self.running){
+                                self.handler=window.requestAnimationFrame(self.mainLoop);
+                            }
+                        }
+                    })(this);
+                    this.regEvents();
+                    this.mainLoop();
+                }
+
+                this.regEvents=function(){
+                    this.node.addEventListener("mousedown",this.bindMouseDown);
+                    this.node.addEventListener("mouseup",this.bindMouseUp)
+                    this.node.addEventListener("mousemove",this.bindMouseMove);
+                    this.win.addEventListener("keyup",this.bindKeyUp,true);
+                    this.win.addEventListener("keydown",this.bindKeyDown,true);
+                };
+                this.getCursorPoint=function(e){
+                    return {x:e.offsetX,y:e.offsetY};
+                }
+
+                this.onMouseDown=function(e){
+                    var pos=this.getCursorPoint(e);
+                };
+
+                this.onMouseMove=function(e){
+                    var pos=this.getCursorPoint(e);
+                };
+
+                this.onMouseUp=function(e){
+                    this.selectNode=null;
+                    var pos=this.getCursorPoint(e);
+                    addObject();          
+                };
+
+                this.onKeyDown=function(e){                    
+                    this.keyMonitor.onKeyDown(e);
+                    if(e.keyCode==32 && !this.running){
+                        this.reStart();
+                    }
+                };
+
+                this.onKeyUp=function(e){
+                    this.keyMonitor.onKeyUp(e);
+                };
+
+                this.reStart=function(){
+                    this.prevTime=performance.now();
+                    this.mainLoop();
+                };
+
+                this.update=function(delta){
+                    this.time+=delta;
+                    if(this.time>=1000){
+                        word.Step(1.0/60,1);
+                        this.ctx.clearRect(0,0,this.w,this.h);
+                        this.ctx.fillStyle="#E1E1E1";
+                        this.ctx.rect(0,0,this.w,this.h);
+                        this.ctx.fill();
+                        //Draw World
+                        drawWorld(word,this.ctx);
+                        this.time=0;
+                    }
+                };
+
+                this.draw=function(ctx){
+                    this.ctx.clearRect(0,0,this.w,this.h);
+                    this.ctx.fillStyle="#111";
+                    this.ctx.fillRect(0,0,this.w,this.h);                    
+                };
+            }
+            var game=new Game(document.getElementById("cav"));
+            game.init();
+        </script>
+    </body>
+</html>
