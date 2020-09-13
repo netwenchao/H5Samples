@@ -1,6 +1,7 @@
 <html>
     <head>
         <style type="text/css">
+        table{border-collapse: collapse;}
         td,th{border:solid 1px #000;}
         </style>
         <script type="text/javascript" src="jquery-1.7.2.min.js"></script>
@@ -217,13 +218,36 @@
                 for(var i=0;i<staffs.items.length;i++){
                     row1.push("<th colspan=\"{0}\">{1}</th>".format(weeks.items.length,staffs.items[i]));
                     for(var j=0;j<weeks.items.length;j++){
-                        row2.push("<th>{0}</th>".format(weeks.items[j]));
+                        row2.push("<td>{0}</td>".format(weeks.items[j]));
                     }
                 }
                 row1.push("</tr>");
                 row2.push("</tr>");
                 rslt.header.push(row1.join("\r\n"));
                 rslt.header.push(row2.join("\r\n"));
+                //var cellTmpl=
+                //todo generate data
+                for(var k in proData){
+                  if(proData.hasOwnProperty(k)){
+                    var rowData=["<tr>"];
+                    var dev=proData[k];
+                    rowData.push("<td>{0}</td>".format(k));
+                    for(var i=0;i<staffs.items.length;i++){
+                      //rowData.push("<td></td><td></td><td></td>");
+                      var staffK=keyPrefix+staffs.items[i];
+                      var staff=dev[staffK]||null;
+                      for(var w=0;w<weeks.items.length;w++){
+                        var wkData=staff==null?null:(staff[keyPrefix+weeks.items[w]]||null);
+                        var weekKey="$"+weeks.items[w];
+                        rowData.push("<td>{0}</td>".format((staff==null || wkData==null)?"0":wkData[weekKey]||0));
+                      }
+                    }
+
+                    rowData.push("</tr>");
+                    rslt.body.push(rowData.join("\r\n"));                    
+
+                  }
+                }
                 rslt.showOutPut();
             };
         </script>
