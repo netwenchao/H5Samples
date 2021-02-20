@@ -62,7 +62,7 @@
             var data =[{
                 "Result": true,
                 "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b0e", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e08", "0"],
-                "Count": 6,
+                "Count": 0,
                 "AggregateResult": [{
                     "Key": "OrderCount",
                     "Value": "6"
@@ -71,7 +71,7 @@
             }, {
                 "Result": true,
                 "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b0e", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e08", "1"],
-                "Count": 2,
+                "Count": 1,
                 "AggregateResult": [{
                     "Key": "OrderCount",
                     "Value": "2"
@@ -89,7 +89,7 @@
             },{
                 "Result": true,
                 "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b01", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e08", "0"],
-                "Count": 6,
+                "Count": 0,
                 "AggregateResult": [{
                     "Key": "OrderCount",
                     "Value": "6"
@@ -98,7 +98,7 @@
             }, {
                 "Result": true,
                 "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b01", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e08", "1"],
-                "Count": 2,
+                "Count": 1,
                 "AggregateResult": [{
                     "Key": "OrderCount",
                     "Value": "2"
@@ -116,7 +116,7 @@
             },{
                 "Result": true,
                 "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b01", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e07", "0"],
-                "Count": 6,
+                "Count": 0,
                 "AggregateResult": [{
                     "Key": "OrderCount",
                     "Value": "6"
@@ -125,7 +125,7 @@
             }, {
                 "Result": true,
                 "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b01", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e07", "1"],
-                "Count": 2,
+                "Count": 1,
                 "AggregateResult": [{
                     "Key": "OrderCount",
                     "Value": "2"
@@ -134,6 +134,15 @@
             }, {
                 "Result": true,
                 "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b01", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e07", "2"],
+                "Count": 2,
+                "AggregateResult": [{
+                    "Key": "OrderCount",
+                    "Value": "2"
+                }],
+                "Message": null
+            }, {
+                "Result": true,
+                "GroupFields": ["20fc2706-dd53-4129-aba2-7803b1848b0d", "e0a64f3b-1350-4c75-8d6c-2ba0b3d52e09", "2"],
                 "Count": 2,
                 "AggregateResult": [{
                     "Key": "OrderCount",
@@ -152,110 +161,214 @@
                     return "";
                 });
             };
-
-            function renderReport(){
-                var rslt={
-                    header:[],
-                    body:[],
-                    foot:[],
-                    showOutPut:function(){
-                        $("#output").html("<table><thead>{0}</thead><tbody>{1}</tbody><tfoot>{2}</tfoot></table>".format(this.header.join("\r\n"),this.body.join("\r\n"),this.foot.join("\r\n")));
-                    }
-                };
-
-                var cols={
-                    Device:{
-                        Name:"DeviceId",
-                        Idx:2
-                    },
-                    Staff:{
-                        Name:"ExecDoctorId",
-                        Idx:0
-                    },
-                    WeekDay:{
-                        Name:"StatisticTimeParts.WeekDayType",
-                        Idx:1
-                    }
-                };
-                var keyPrefix="$";
-                var proData={};
-                var staffs={};
-                var weeks={};
-                /*
-                    - adapt data                    
-                */
-                $(data).each(function(){
-                    var curObj=proData;
-                    for(var i=0;i<this.GroupFields.length;i++){
-                        var key=keyPrefix+this.GroupFields[i];
-                        if(i==1 && !staffs.hasOwnProperty(key)){                            
-                            !staffs["items"] && (staffs["items"]=[]);
-                            staffs["items"].push(this.GroupFields[i]);
-                            staffs[key]=staffs["items"].length-1;
-                        }
-
-                        if(i==2 && !weeks.hasOwnProperty(key)){                            
-                            !weeks["items"] && (weeks["items"]=[]);
-                            weeks["items"].push(this.GroupFields[i]);
-                            weeks[key]=weeks["items"].length-1;
-                        }
-
-                        if(!curObj.hasOwnProperty(key)){
-                            if(i==(this.GroupFields.length-1)){
-                                curObj[key]=this.Count;
-                            }else{
-                                curObj[key]={};
-                            }
-                        }                        
-                        curObj=curObj[key];
-                    }
-                });
-                console.log(proData);
-                console.log(staffs);
-                console.log(weeks);
-                var row1=["<tr><th rowspan=\"2\">设备</th>"];
-                var row2=["<tr>"];
-                for(var i=0;i<staffs.items.length;i++){
-                    row1.push("<th colspan=\"{0}\">{1}</th>".format(weeks.items.length,staffs.items[i]));
-                    for(var j=0;j<weeks.items.length;j++){
-                        row2.push("<td>{0}</td>".format(weeks.items[j]));
-                    }
-                }
-                row1.push("</tr>");
-                row2.push("</tr>");
-                rslt.header.push(row1.join("\r\n"));
-                rslt.header.push(row2.join("\r\n"));
-                //var cellTmpl=
-                //todo generate data
-                for(var k in proData){
-                  if(proData.hasOwnProperty(k)){
-                    var rowData=["<tr>"];
-                    var dev=proData[k];
-                    rowData.push("<td>{0}</td>".format(k));
-                    for(var i=0;i<staffs.items.length;i++){
-                      //rowData.push("<td></td><td></td><td></td>");
-                      var staffK=keyPrefix+staffs.items[i];
-                      var staff=dev[staffK]||null;
-                      for(var w=0;w<weeks.items.length;w++){
-                        var wkData=staff==null?null:(staff[keyPrefix+weeks.items[w]]||null);
-                        var weekKey="$"+weeks.items[w];
-                        rowData.push("<td>{0}</td>".format((staff==null || wkData==null)?"0":wkData[weekKey]||0));
-                      }
-                    }
-
-                    rowData.push("</tr>");
-                    rslt.body.push(rowData.join("\r\n"));                    
-
-                  }
-                }
-                rslt.showOutPut();
-            };
         </script>
     </head>
     <body>
         <div id="output"></div>
         <script type="text/javascript">
-        renderReport();
+            /*
+/*
+ * 分组字段>=2
+ */
+ ; var reportEngine_RowConversion = (function () {
+    function DictArray() {
+        var dict = {};
+        this.items = [];
+        var keyPreFix = "$$";
+        var self = this;
+        this.length = 0;
+        this.add = function (val) {
+            var k = keyPreFix + (val !== 0 ? (val || "") : 0);
+            if (!dict.hasOwnProperty(k)) {
+                dict[k] = val;
+                self.items.push(val);
+                self.length++;
+            }
+        };
+        return this;
+    }
+    var __converter = null;
+    function generateOutput(dataItems, report) {
+        if (report.GroupFields.length < 2) {
+            //todo render using defaultEngine
+            return;
+        }
+
+        var rowData = {};
+        var colGroup = {};
+        var groupFields = report.GroupFields;
+        var aggFields = report.AggregateFields;
+        var gpMaxIdx = groupFields.length - 1;
+
+        var kPrefix = "$";
+        //convert data basedon fst Group field.
+        $(dataItems).each(function () {
+            var item = this;
+            var curO = null;
+            for (var gIdx = 0; gIdx < groupFields.length; gIdx++) {
+                var key = "$" + (item.GroupFields[gIdx] !== 0 ? (item.GroupFields[gIdx] || "") : "0");
+                if (gIdx == 0) {
+                    !rowData.hasOwnProperty(key) && (rowData[key] = {});
+                    curO = rowData[key];
+                } else if (gIdx == gpMaxIdx) {
+                    !curO[key] && (curO[key] = {});
+                    curO = curO[key];
+                    for (var aIdx = 0; aIdx < aggFields.length; aIdx++) {
+                        curO[aggFields[aIdx].FieldName] = item.AggregateResult[aIdx].Value;
+                    }
+                } else {
+                    !curO[key] && (curO[key] = {});
+                    curO = curO[key];
+                }
+
+                if (gIdx != 0) {
+                    !colGroup.hasOwnProperty(groupFields[gIdx].FieldName) && (colGroup[groupFields[gIdx].FieldName] = new DictArray());
+                    colGroup[groupFields[gIdx].FieldName].add(item.GroupFields[gIdx]);
+                }
+            }
+        });
+
+        function procNode(lev, node,summary) {
+            if (lev == groupFields.length) {
+                //Todo build using count fields
+                for (var i = 0; i < aggFields.length; i++) {
+                    var key = aggFields[i].FieldName;
+                    !node.hasOwnProperty(key) && (node[key] = 0);
+                    !summary.hasOwnProperty(key) && (summary[key]=0);
+                    var val=parseInt(node[key]);
+                    if(!isNaN(val)){
+                        summary[key]+=val;
+                    }
+                }
+            } else {
+                var gpData = colGroup[groupFields[lev].FieldName];
+                for (var i = 0; i < gpData.items.length; i++) {
+                    var key = kPrefix + (gpData.items[i] !== 0 ? (gpData.items[i] || "") : "0");
+                    !node.hasOwnProperty(key) && (node[key] = {});
+                    !summary.hasOwnProperty(key) && (summary[key]={});
+                    procNode(lev + 1, node[key],summary[key])
+                }
+            }
+        }
+
+        var summaryRow={};
+        //Build missing data
+        for (var k in rowData) {
+            if (rowData.hasOwnProperty(k)) {
+                var fstLev = rowData[k];//devlev
+                procNode(1, fstLev,summaryRow);
+            }
+        }
+
+        console.log(rowData);
+        console.log(summaryRow);        
+        console.log(colGroup);
+
+        var output = {
+            header: [],
+            body: [],
+            foot: [],
+            getOutPut: function () {
+                return "<table class=\"reportDataTable headerCenter\" style=\"text-align:center;\"><thead>{0}</thead><tbody>{1}</tbody><tfoot>{2}</tfoot></table>".format(this.header.join("\r\n"), this.body.join("\r\n"), this.foot.join("\r\n"));
+            }
+        };
+
+        function getFieldValue(val, fieldName) {
+            return __converter.convert(fieldName,val);
+        }
+
+        var colSpans = [];
+        for (var i = groupFields.length - 1; i > 0; i--) {
+            if (i == groupFields.length - 1) {
+                colSpans[i] = aggFields.length;
+            } else {
+                colSpans[i] = colSpans[i + 1] * colGroup[groupFields[i + 1].FieldName].length;
+            }
+        }
+
+        var headerRow = [];
+        for (var i = 1; i < groupFields.length; i++) {
+            var vals = colGroup[groupFields[i].FieldName].items;
+            var parentSize =i==1?1:colGroup[groupFields[i-1].FieldName].items.length;
+            var colSpan = colSpans[i] || 0;
+            var cells = [];
+            for (var c = 0; c < parentSize; c++) {
+                for (var idx = 0; idx < vals.length; idx++) {
+                    if (colSpan > 1) {
+                        cells.push("<th colspan=\"{1}\">{0}</th>".format(getFieldValue(vals[idx], groupFields[i].FieldName), colSpan));
+                    } else {
+                        cells.push("<th>{0}</th>".format(getFieldValue(vals[idx], groupFields[i].FieldName)));
+                    }
+                }
+            }
+            headerRow[i] = cells;
+        }
+
+        if (aggFields.length > 1) {
+            var aggCells = [];
+            var groupRows = headerRow[headerRow.length - 1].length;
+            for (var i = 0; i < groupRows; i++) {
+                $(aggFields).each(function () {
+                    aggCells.push("<th>{0}</th>".format(ris_utils.htmlEncode(this.Display)));
+                });
+            }
+            headerRow.push(aggCells);
+        }
+
+        $(headerRow).each(function (i, item) {
+            if (!item) return true;
+            if (i == 1) {
+                output.header.push("<tr><th rowspan=\"{0}\">{1}</th>{2}</tr>".format(groupFields.length - 1 + (aggFields.length - 1), groupFields[0].DisplayName || groupFields[0].Display, item.join("\r\n")));
+            } else {
+                output.header.push("<tr>{0}</tr>".format(item.join("\r\n")));
+            }
+        });
+
+        function getCellHtml(obj, arr, lev) {
+            if (lev == groupFields.length) {
+                //using count fields
+                for (var i = 0; i < aggFields.length; i++) {
+                    var key = aggFields[i].FieldName;
+                    arr.push("<td>{0}</td>".format(obj[key]));
+                }
+            } else {
+                var gpData = colGroup[groupFields[lev].FieldName];
+                for (var i = 0; i < gpData.items.length; i++) {
+                    var key = kPrefix + (gpData.items[i] !== 0 ? (gpData.items[i] || "") : "0");
+                    getCellHtml(obj[key], arr, lev + 1);
+                }
+            }
+        }
+
+        for (var k in rowData) {
+            if (rowData.hasOwnProperty(k)) {
+                var rowHtml = []
+                getCellHtml(rowData[k], rowHtml, 1)
+                output.body.push("<tr><td>{0}</td>{1}</tr>".format(getFieldValue(k.substr(1), groupFields[0].FieldName), rowHtml.join("\r\n")));
+            }
+        }
+        //summaryRow
+        var footHtmls=[];
+        getCellHtml(summaryRow,footHtmls,1);
+        output.foot.push("<tr><td>{0}</td>{1}</tr>".format("总计",footHtmls.join("\r\n")));
+        return output.getOutPut();
+    }
+
+    return {
+        setConverter: function (convert) {
+            __converter = convert
+        },
+        generateReport: function (target, data, matchFields, params,report) {
+            $(target).html(generateOutput(data, report));
+        }
+    }
+})();
+
+reportEngine_RowConversion.setConverter({convert:function(v,f){
+return v+f;
+}});
+reportEngine_RowConversion.generateReport($("#output"),data,null,null,report);
+
         </script>
     </body>
 </html>

@@ -11,63 +11,7 @@
     <body>
         <canvas id="cav" width="320" height="480">            
         </canvas>
-        <script type="text/javascript">            
-            function Bricks(w,h,r,c,owner){
-                this.w=w||0;
-                this.h=h||0;
-                this.rows=r;
-                this.cols=c;
-                this.colors=['#9d9d9d', '#f80207', '#feff01', '#0072ff', '#fc01fc', '#03fe03'];
-                this.cellW=this.w/this.rows;
-                this.cellH=24;
-                this.debug=true;
-                this.owner=owner;                
-                this.blocks=[];
-                this.init=function(){
-                    this.blocks=[];
-                    for(var r=0;r<this.rows;r++){
-                        this.blocks[r]=[];
-                        for(var c=0;c<this.cols;c++){
-                            this.blocks[r].push(1);
-                        }
-                    }
-                };
-
-                this.update=function(delta){
-                };
-
-                this.draw=function(ctx){
-                    ctx.fillStyle="#E1E1E1";
-                    ctx.fillRect(0,0,this.owner.w,this.owner.h);
-                    for(var r=0;r<this.rows;r++){                        
-                        ctx.strokeStyle="#666666";
-                        ctx.fillStyle=this.colors[r%this.colors.length];
-                        for(var c=0;c<this.cols;c++){
-                            if(this.blocks[r][c]){
-                                ctx.beginPath();
-                                ctx.rect(c*this.cellW,r*this.cellH,this.cellW,this.cellH);
-                                ctx.stroke();
-                                ctx.closePath();
-                                ctx.fill();
-                            }
-                        }
-                    }
-                };
-
-                this.isCollisionWith=function(objRect){
-                    var iRow=Math.floor(objRect.y/this.cellH);
-                    var iCell=Math.floor(objRect.x/this.cellW);
-                    if(objRect.y>=this.cellH*iRow && (objRect.y<=this.cellH*iRow+this.h) 
-                        && objRect.x>=this.cellW*iCell && objRect.x<=(this.cellW*iCell+this.w)
-                        && iRow>=0 && iRow<this.rows && iCell>=0 && iCell<this.cols
-                        && this.blocks[iRow][iCell]){
-                        this.blocks[iRow][iCell]=0;
-                        return true;
-                    }
-                    return false;
-                };
-            }
-            
+        <script type="text/javascript">
             function KeyMonitor(){
                 this.status={};
                 this.onKeyDown=function(e){
@@ -88,6 +32,22 @@
             KeyMonitor.prototype.KeyRight=39;
             KeyMonitor.prototype.KeyDown=40;
 
+            function Rect(x,y,w,h){
+                this.x=x;
+                this.y=y;
+                this.w=w;
+                this.h=h;
+                this.color="#FF0000";
+            }
+
+            Rect.prototype.draw=function(ctx){
+                ctx.fillStyle=this.color;
+                ctx.beginPath();
+                ctx.rect(this.x,this.y,this.w,this.h);
+                ctx.fill();
+                ctx.closePath();
+            };
+
             function Ball(x,y,r,dx,dy,owner){
                 this.x=x;
                 this.y=y;                
@@ -99,8 +59,8 @@
                     return {
                         x:this.x-this.r,
                         y:this.y-this.r,
-                        w:this.r*2,
-                        h:this.r*2
+                        w:this.r,
+                        h:this.r
                     };
                 };
                 this.stop=function(ctx){
@@ -112,8 +72,14 @@
             }
 
             Ball.prototype.draw=function(ctx){
+                ctx.strokeStyle="#FF0000";
+                ctx.beginPath();
+                ctx.rect(this.x,this.y,this.w,this.h);
+                ctx.closePath();
+                ctx.stroke();
+
                 ctx.beginPath();                
-                ctx.fillStyle="#FFF";
+                ctx.fillStyle="#FFF";                
                 ctx.arc(this.x,this.y,this.r,0,2*Math.PI);
                 ctx.fill();
                 ctx.closePath();
@@ -153,44 +119,7 @@
                 if(this.y>(this.owner.y-this.r)){
                     this.y=this.owner.h-this.r;
                 }
-            };
-
-            function Padd(x,y,w,h,owner){
-                this.x=x||0;
-                this.y=y||0;
-                this.w=w||0;
-                this.h=h||0;
-                this.speed=100/1000;
-                this.owner=owner;
-
-                this.update=function(delta){
-                    if(this.owner.isLeftPressed()){
-                        this.x-=delta*this.speed;
-                    }else if (this.owner.isRightPressed()){
-                        this.x+=delta*this.speed;
-                    }
-                    
-                    if(this.x>=this.owner.w-this.w){
-                        this.x=this.owner.w-this.w;
-                    }else if(this.x<=0){
-                        this.x=0;
-                    }
-                }
-
-                this.draw=function(ctx){
-                    ctx.strokeStyle="#666";
-                    ctx.fillStyle="#FFF";
-                    ctx.beginPath();
-                    ctx.rect(this.x,this.y,this.w,this.h);
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.closePath();
-                };
-
-                this.isCollisionWith=function(rect){
-                    return collisionCheck(rect,this);
-                };
-            }            
+            };            
 
             function Game(node){
                 this.w=320;
@@ -201,24 +130,12 @@
                 this.node=node;
                 this.win=window;
                 this.handler=null;
-                this.prevTime=0;
-                this.time=0;
-                this.lastTime=localStorage.getItem("lastTime");
-                this.lastScore=localStorage.getItem("lastScore");
-                this.score=0;
+                this.prevTime=0;                
                 this.running=false;
+                this.block=new Rect(100,100,40,40);
 
                 this.ctx=node.getContext("2d");
-                this.audios=[];                
-                this.audios[0]=new Audio("media/snd1.wav");
-                this.audios[1]=new Audio("media/snd2.wav");
-                this.audios[2]=new Audio("media/snd3.wav");
-                this.audios[0].volume=0.9;
-                this.audios[1].volume=0.9;
-                this.audios[2].volume=0.9;
-
-                this.keyMonitor=new KeyMonitor();
-                this.bricks=new Bricks(this.w,this.h,4,6,this);
+                this.keyMonitor=new KeyMonitor();                
                 this.isLeftPressed=function(){
                     return  this.keyMonitor.keyPressed(this.keyMonitor.KeyLeft);
                 };
@@ -228,7 +145,7 @@
                 };
                 
                 this.ball=new Ball((this.w-BallSize)/2,boardY-BallSize,BallSize,null,null,this);
-                this.padd=new Padd((this.w-boardW)/2,boardY,boardW,8,this);
+                
 
                 this.init=function(){
                     this.bindMouseDown=(function(scope){
@@ -282,6 +199,7 @@
                         }
                     })(this);
                     this.regEvents();
+                    //this.mainLoop();
                 }
 
                 this.regEvents=function(){
@@ -320,10 +238,7 @@
                 };
 
                 this.reStart=function(){
-                    this.ball.dx=100;
-                    this.ball.dy=-100;
                     this.running=true;
-                    this.bricks.init();
                     this.prevTime=performance.now();
                     this.mainLoop();
                 };
@@ -331,61 +246,80 @@
                 this.update=function(delta){
                     this.time+=delta;
                     this.ball.update(delta);
-                    this.bricks.update(delta);
-                    this.padd.update(delta);
-                    if(this.bricks.isCollisionWith(this.ball.getRect())){
-                        this.ball.dy=-this.ball.dy;
-                        this.score++;
-                        this.audios[0].play();
-                    }
-                    
-                    if(this.padd.isCollisionWith(this.ball.getRect())){
-                        this.ball.dy=-1*this.ball.dy;
-                        if(this.ball.y>=this.padd.y-this.ball.r){
-                            this.ball.y=this.padd.y-this.ball.r;
-                        }
-                    }
-
-                    if(this.ball.y>=(this.h-this.ball.r)){
-                        this.ball.stop(this.ctx);
-                        localStorage.setItem("lastTime",Math.floor(this.time/1000));
-                        localStorage.setItem("lastScore",this.score);
-                        this.audios[1].play();
-                        this.running=false;
-                    }
                 };
 
                 this.draw=function(ctx){
                     this.ctx.clearRect(0,0,this.w,this.h);
-                    this.ctx.fillStyle="#111";
-                    this.ctx.fillRect(0,0,this.w,this.h);
+                    this.ctx.fillStyle="#F1F1F1";
+                    this.ctx.beginPath();
+                    this.ctx.rect(0,0,this.w,this.h);
+                    this.ctx.fill();
+                    this.ctx.closePath();
 
-                    this.bricks.draw(this.ctx);
+                    this.block.draw(this.ctx);
                     this.ball.draw(this.ctx);
-                    this.padd.draw(this.ctx);
 
                     this.ctx.font="16px Verdana";
                     this.fillStyle="#FFFFFF";
-                    var s=Math.floor(this.time/1000);
-                    if(s<10){
-                        this.ctx.fillText("Time:0"+Math.floor(s),220,380);
-                    }else{
-                        this.ctx.fillText("Time:"+Math.floor(s),220,380);
-                    }
-                    this.ctx.fillText("Score:"+(this.score<10?"0"+this.score:this.score),220,400);
                 };
             }
             var game=new Game(document.getElementById("cav"));
             game.init();
+/*
+1______2  2______1 
+|      |  |      |
+| Rec1 |  | Rec2 |
+|______|  |______| 
 
-            function collisionCheck(rec1,rec2){
-                return (
-                    rec1.x<rec2.x+rec2.w &&
-                    rec2.x<rec1.x+rec1.w &&
-                    rec1.y<rec2.y+rec2.h &&
-                    rec2.y<rec1.y+rec1.h
-                );                
-            }
+3______   4______ 
+|      |  |      |
+| Rec1 |  | Rec2 |
+|______4  3______| 
+
+ ————————
+|        |
+|      ——|——————
+|     |  |      |
+|————————|      |
+      |—————————|
+
+
+Rect:
+    if (rect1.x < rect2.x + rect2.width &&
+    rect2.x < rect1.x + rect1.width &&
+    rect1.y < rect2.y + rect2.height &&
+    rect2.y< rect1.y + rect1.height) {
+        // collision detected!
+    }
+Cycle:
+*/
+function CollectionCheck(){
+    x1<x2+w2
+    x2<x1+w1
+    y1<y2+h2
+    y2<y1+h1
+}
+
+function CollectionChk(){
+    this.rectCheck=function(r1,r2){
+        return r1.x<r2.x+r2.w &&
+        r2.x<r1.x+r1.w
+        r1.y<r2.y+r2.h
+        r2.y<r1.y+r1.h;
+    };
+
+    this.rectLstCheck=function(rl1,rl2){
+        
+    };
+
+    this.cycleCheck=function(c1,c2){
+        return Math.pow(c1.x-c2.x,2)+Math.pow(c1.y-c2.y)<Math.pow((c1.r+c2.r),2);
+    };
+
+    this.rectCycleCheck=function(c1,r){
+
+    };
+}
         </script>
     </body>
 </html>
