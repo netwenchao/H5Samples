@@ -1,0 +1,21 @@
+<html>
+    <head>                
+    </head>
+    <body>
+        <canvas id="cav" width="360" height="480">            
+        </canvas>
+        <div style="display: none;">
+            <img src="images/btn.png"/>
+            <img src="images/dirt.jpeg"/>
+            <img src="images/grass.jpg"/>
+            <img src="images/down.png"/>
+            <img src="images/up.png"/>
+            <img src="images/left.png"/>
+            <img src="images/right.png"/>            
+        </div>
+        <script type="module">
+            import Main from "./main.js"
+            var m=new Main(document.getElementById("cav"),360,480);
+        </script>        
+    </body>
+</html>
