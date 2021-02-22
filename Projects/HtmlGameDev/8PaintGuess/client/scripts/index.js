@@ -91,6 +91,7 @@ var gPaint=(function(){
     });
 
     $(colorEle).find(".pad").click(function(){
+      //debugger;
       data.color=$(this).attr("data-color")
     });
   }
@@ -105,14 +106,20 @@ var gPaint=(function(){
     ctx.stroke();
   }
 
+  function pad(num)
+  {
+    if(num.length==1)return "0"+num;
+    return num;
+  }
+
   function createPad(){
     var output=[];
     var r=0,g=0,b=0,c="";
     while(r<=256){
-      r+=2;
-      g+=2;
-      b+=2;
-      c=`#${((r-1)*16).toString(16)}${((g-1)*16).toString(8)}${(b-1).toString(16)}`;
+      r+=1;
+      g+=1;
+      b+=1;
+      c=`#${pad(r.toString(16))}${pad(g.toString(16))}${pad(b.toString(16))}`;
       output.push(`<span class="pad" data-color="${c}" style="background-color:${c}"></span>`);
     }
     $(colorEle).html(output.join("\r\n"));
