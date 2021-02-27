@@ -1,0 +1,5 @@
+html,body{margin:0;padding:0;height: 100%;}
+.el-breadcrumb{margin-bottom: 16px;}
+.el-card{box-shadow: 0 1px 8px 0 rgba(0,0,0,.1);}
+.el-table {margin-top: 16px;font-size: 14px;}
+.el-pagination{margin-top: 8px;}

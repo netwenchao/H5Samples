@@ -1,0 +1,152 @@
+<html>
+<head> 
+    <style type="text/css">
+    #message{border:solid 1px #eee;}
+    </style>
+</head>
+<body>
+    <input type="button" value="DoTest" id="doTest"/>
+    <div id="message">
+    </div>
+    <script type="text/javascript">
+        function LinkList(){
+            var Node=function (d,n){
+                this.data=d;
+                this.next=n;
+            };
+
+            this.createH=function (arr){
+                if(!arr) return null;
+                var lst=null;
+                arr.forEach((a)=>{
+                    var node=new Node(a,null);
+                    if(!lst){
+                        lst=node;
+                        h=node;
+                    }
+                    else{
+                        node.next=lst;
+                        lst=node;
+                    }
+                });
+                return lst;
+            }
+
+            this.createL=function(arr){
+                if(!arr) return null;
+                var lst=null,r=null;
+                arr.forEach((a)=>{
+                    var node=new Node(a,null);
+                    if(lst){
+                        r.next=node;
+                        r=node;
+                    }else{
+                        lst=node;
+                        r=node;
+                    }
+                });
+                return lst;
+            }
+        
+            this.len=function(lst){
+                if(lst){
+                    var ct=1,n=null;
+                    while((n=lst.next)){
+                        ct++;
+                    }
+                }
+                return 0;
+            }
+            
+            this.get=function(lst,i){
+                if(!lst) return null;
+                if(i==0) return lst;
+                var n=lst;
+                while(n && i>0){
+                    i--;
+                    n=n.next;
+                    if(i==0) return n;
+                }
+                return null;
+            }
+
+            this.loc=function(lst,val){
+                if(!lst) return null;
+                if(lst.data==val) return lst;
+                var n=lst;
+                while((n=n.next)){
+                    if(n.data==val) return n;
+                }
+                return null;
+            }
+
+            this.insert=function(l,i,val){
+                if(!l) return false;
+                var n=new Node(val,null);
+                if(i==0){
+                    n.next=l;
+                    l=n;
+                    return n;
+                }
+                var h=l,p=l;
+                while((h=h.next) && i>0){
+                    i--;
+                    if(i==0){
+                        n.next=h;
+                        p.next=n;
+                        return l;
+                    }
+                    p=h;
+                }
+                return false;
+            };
+
+            this.delete=function(l,i){
+                if(!l) return false;
+                if(i==0) {
+                    l=l.next;
+                    return true;
+                }
+
+                var f=l,s=l;
+                while((f=f.next) && i>0){
+                    i--;
+                    if(i==0){
+                        s.next=f.next;
+                    }
+                    s=f;
+                }
+                return true;
+            };
+        }
+
+        function test(){
+            document.getElementById("message").inerText="";
+            var fac=new LinkList();
+            var l=fac.createH([1,2,3,4])
+            showMsg("After Create H");
+            showMsg(l);
+            showMsg(fac.get(l,0));
+            showMsg("After Get 0");
+            showMsg(fac.get(l,1));
+            showMsg("After Get 1");
+            showMsg(fac.get(l,10));
+            showMsg("After Get 10");
+            showMsg(fac.loc(l,2));
+            showMsg("After loc 2");
+            showMsg(fac.insert(l,2,33));
+            showMsg("After inert 2 33");
+            showMsg(fac.delete(l,2));
+            showMsg(l);
+            showMsg("After delete 2");
+        }
+
+        function showMsg(msg){
+            var node=document.getElementById("message");
+            node.innerText=`${node.innerText}\r\n${(typeof(msg)=="object")?JSON.stringify(msg):msg}`;
+        }
+        document.getElementById("doTest").addEventListener("click",test);
+        test();
+    </script>
+</body>
+</html>
