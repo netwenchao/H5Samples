@@ -1,19 +1,22 @@
-const ws=require(__dirname+'/node_modules/node-websocket-server/lib/ws/server');
-const server=ws.createServer();
-const port="9898";
+//attach socket.io to HttpServer
+const server=require("http").createServer();
+const io=require("socket.io")(server);
+io.on("connection",client=>{
+    client.on("message",function(){
 
-server.addListener("connection",function(conn){
-    console.log("Connection established "+conn.id);
+    });
 });
-
-server.addListener("close",function(conn){
-    //console.log("Connection established "+conn);
+server.listen(10100,function(){
+    console.log("listening on *.10100");
 });
-
-server.addListener("message",function(){
-
-});
-
-server.listen(port);
-console.log("WebSocket server is running...");
-console.log("listening to "+port);
+/*
+const io=require("socket.io")();
+io.on("connection",socket=>{
+    socket.send("Hello!");
+    socket.on("message",(data)=>{
+        console.log(data);
+    });
+})
+io.listen(3000);
+console.log("server is listening at 10010");
+*/
