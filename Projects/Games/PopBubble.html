@@ -1,0 +1,208 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,
+    user-scalable=no, initial-scale=1, maximum-scale=1, user-scalable=0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<style type="text/css">
+body { margin: 0; padding: 0; background: #000;}
+canvas { display: block; margin: 0 auto; background: #fff; }
+</style>
+</head>
+<body>
+    <canvas id="main"></canvas>
+    <script type="text/javascript">
+        window.requestAnimFrame = (function(){
+            return  window.requestAnimationFrame       ||
+                    window.webkitRequestAnimationFrame ||
+                    window.mozRequestAnimationFrame    ||
+                    window.oRequestAnimationFrame      ||
+                    window.msRequestAnimationFrame     ||
+                    function( callback ){
+                        window.setTimeout(callback, 1000 / 60);
+                    };
+            })();
+
+        var POP={
+            WIDTH:320,
+            HEIGHT:480,
+            RATIO:1,
+            offset:{
+                top:0,
+                left:0
+            },
+            entities:[],
+            scale:1,
+            currentWidth:0,
+            currentHeight:0,
+            canvas:null,
+            ctx:null,
+            ua:"",
+            nextBubble:100,
+            init:function(el){
+                POP.canvas=el;
+                POP.ctx=POP.canvas.getContext("2d");
+                POP.RATIO=POP.WIDTH/POP.HEIGHT;
+                POP.canvas.width=POP.WIDTH;
+                POP.canvas.height=POP.HEIGHT;
+                POP.currentWidth = POP.WIDTH;
+                POP.currentHeight = POP.HEIGHT;
+                POP.ua=navigator.userAgent.toLocaleLowerCase();
+                POP.isAndroid=POP.ua.indexOf("android")>-1;
+                POP.isIOS=POP.ua.indexOf("iphone")>-1 || POP.ua.indexOf("ipad")>-1;
+
+                window.addEventListener("click",function(e){
+                    e.preventDefault();
+                    POP.INPUT.set(e);
+                },false);
+
+                window.addEventListener("touchstart",function(e){
+                    e.preventDefault();
+                    POP.INPUT.set(e.touches[0]);
+                },false);
+
+                window.addEventListener("touchmove",function(e){
+                    e.preventDefault();
+                },false);
+
+                window.addEventListener("touchend",function(e){
+                    e.preventDefault();
+                },false);
+
+                POP.resize();
+                POP.loop();
+            },
+            resize:function(){
+                POP.currentHeight=window.innerHeight;
+                POP.currentWidth=POP.currentHeight*POP.RATIO;
+                
+                if(POP.isAndroid || POP.isIOS){
+                    document.body.style.height=(window.innerHeight+50)+"px";
+                }
+
+                POP.canvas.style.width=POP.currentWidth+"px";
+                POP.canvas.style.height=POP.currentHeight+"px";
+                POP.scale=POP.currentWidth/POP.WIDTH;
+
+                POP.offset.top = POP.canvas.offsetTop;
+                POP.offset.left = POP.canvas.offsetLeft;
+
+                window.setTimeout(function(){
+                    window.scrollTo(0,1);
+                },1);
+            },
+            loop:function(){
+                requestAnimFrame(POP.loop);
+                POP.update();
+                POP.render();
+            },
+            update:function(){
+                POP.nextBubble--;
+                if(POP.nextBubble==0){
+                    POP.entities.push(new POP.Bubble());
+                    POP.nextBubble=Math.floor(Math.random()*100+50);
+                }
+
+                if(POP.INPUT.tapped){
+                    POP.entities.push(new POP.Touch(POP.INPUT.x,pop.INPUT.y));
+                    POP.INPUT.tapped=false;
+                }
+
+                for(var i=0;i<POP.entities.length;i+=1){
+                    POP.entities[i].update();
+                    if(POP.entities[i].remove){
+                        POP.entities.splice(i,1);
+                    }
+                }
+            },
+            render:function(){
+                POP.Draw.rect(0,0,POP.WIDTH,POP.HEIGHT,"#036");
+                for(var i=0;i<POP.entities.length;i+=1){
+                    POP.entities[i].render();
+                }
+            }
+        };
+
+        POP.Touch=function(x,y){
+            this.x=x||0;
+            this.y=y||0;
+            this.r=5;
+            this.opacity=1;
+            this.fade=0.05;
+            this.remove=false;
+            this.type="touch";
+
+            this.update=function(){
+                this.opacity-=this.fade;
+                this.remove=this.opacity<0;
+            };
+
+            this.render=function(){
+                POP.Draw.circle(this.x,this.y,this.r,'rgba(255,0,0,'+this.opacity+')');
+            }
+        }
+
+        POP.Bubble=function(){
+            this.type="bubble";
+            this.x=100;
+            this.r=Math.floor((Math.random()*20)+10);
+            this.d=2*this.r;
+            this.y=POP.HEIGHT+100;
+            this.speed=Math.floor(Math.random()*3+1);
+            this.remove=false;
+
+            this.update=function(){
+                this.y-=this.speed;
+                this.remove=this.y<(-1*this.d);
+            };
+
+            this.render=function(){
+                POP.Draw.circle(this.x,this.y,this.r,"#FFFFFF");
+            };
+        };
+        
+        POP.Draw={
+            clear:function(){
+                POP.ctx.clearRect(0,0,POP.WIDTH,POP.HEIGHT);
+            },
+            rect:function(x,y,w,h,color){
+                POP.ctx.fillStyle=color||"#FFFFFF";
+                POP.ctx.fillRect(x,y,w,h);
+            },
+            circle:function(x,y,r,color){
+                POP.ctx.fillStyle=color||"#FFFFFF";
+                POP.ctx.beginPath();
+                POP.ctx.arc(x,y,r,0,2*Math.PI,true);
+                POP.ctx.closePath();
+                POP.ctx.fill();
+            },
+            text:function(str,x,y,color){
+                POP.ctx.font="";
+                POP.ctx.fillStyle=color||"#FFFFFF";
+                POP.ctx.fillText(str,x,y);
+            }
+        };
+
+        POP.INPUT={
+            x:0,
+            y:0,
+            tapped:false,
+            set:function(e){
+                this.x=(e.pageX-POP.offset.left)/POP.scale;
+                this.y=(e.pageY-POP.offset.top)/POP.scale;
+                this.tapped=true;
+                POP.Draw.circle(this.x,this.y,10,"red");
+            }
+        };
+
+        window.addEventListener("load",function(){
+            POP.init(document.getElementById("main"));
+        },false);
+        window.addEventListener("resize",POP.resize,false);
+    </script>
+</body>
+</html>
