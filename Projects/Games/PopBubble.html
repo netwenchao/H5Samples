@@ -9,6 +9,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
 <style type="text/css">
+/*
+https://www.smashingmagazine.com/2012/10/design-your-own-mobile-game/
+*/
 body { margin: 0; padding: 0; background: #000;}
 canvas { display: block; margin: 0 auto; background: #fff; }
 </style>
@@ -43,6 +46,7 @@ canvas { display: block; margin: 0 auto; background: #fff; }
             ctx:null,
             ua:"",
             nextBubble:100,
+            waves:null,
             init:function(el){
                 POP.canvas=el;
                 POP.ctx=POP.canvas.getContext("2d");
@@ -54,6 +58,7 @@ canvas { display: block; margin: 0 auto; background: #fff; }
                 POP.ua=navigator.userAgent.toLocaleLowerCase();
                 POP.isAndroid=POP.ua.indexOf("android")>-1;
                 POP.isIOS=POP.ua.indexOf("iphone")>-1 || POP.ua.indexOf("ipad")>-1;
+                POP.waves=new POP.Wave();
 
                 window.addEventListener("click",function(e){
                     e.preventDefault();
@@ -102,29 +107,109 @@ canvas { display: block; margin: 0 auto; background: #fff; }
             },
             update:function(){
                 POP.nextBubble--;
+                POP.waves.update();
+                let checkCollision=false;
                 if(POP.nextBubble==0){
                     POP.entities.push(new POP.Bubble());
-                    POP.nextBubble=Math.floor(Math.random()*100+50);
+                    POP.nextBubble=Math.floor(Math.random()*50+50);
                 }
 
                 if(POP.INPUT.tapped){
-                    POP.entities.push(new POP.Touch(POP.INPUT.x,pop.INPUT.y));
+                    POP.entities.push(new POP.Touch(POP.INPUT.x,POP.INPUT.y));
                     POP.INPUT.tapped=false;
+                    checkCollision=true;
+                    POP.Score.taps++;
                 }
 
+                var pCount=0;
+                console.log(`T:${POP.entities.length}`);
                 for(var i=0;i<POP.entities.length;i+=1){
                     POP.entities[i].update();
+                    if(POP.entities[i].type=="bubble" && checkCollision){
+                        POP.entities[i].remove=POP.checkCollision(POP.entities[i],{x:POP.INPUT.x,y:POP.INPUT.y,r:7});
+                        if(POP.entities[i].remove){
+                            pCount=(~~(Math.random()*10))+5;
+                            console.log(`pCpunt:${pCount} ${i}  T:${POP.entities.length}`);
+                            for(var i=0;i<pCount;i++){
+                                POP.entities.push(new POP.Particle(POP.INPUT.x,POP.INPUT.y,2,'rgba(255,255,255,'+Math.random().toFixed(1)+')'));
+                            }
+                            POP.Score.hit++;
+                        }
+                    }
+
                     if(POP.entities[i].remove){
                         POP.entities.splice(i,1);
                     }
                 }
+                POP.Score.update();
             },
             render:function(){
                 POP.Draw.rect(0,0,POP.WIDTH,POP.HEIGHT,"#036");
+                POP.waves.render();
+                POP.Score.render();
                 for(var i=0;i<POP.entities.length;i+=1){
                     POP.entities[i].render();
                 }
             }
+        };
+        POP.checkCollision=function(a,b){
+            var disSquared=(a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y);
+            var rSquared=(a.r+b.r)*(a.r+b.r);
+            return disSquared<rSquared;
+        }
+
+        POP.Particle = function(x,y,r,color){
+            this.x=x;
+            this.y=y;
+            this.r=r;
+            this.color=color||"#FFF";
+
+            this.dir = Math.random()*10>5?1:-1;
+            this.vx = ~~(Math.random()*4)*this.dir;
+            this.vy = ~~(Math.random()*7);
+            this.remove=false;
+
+            this.update=function(){
+                this.x+=this.vx;
+                this.y+=this.vy;
+
+                this.vx*=0.99;
+                this.vy*=0.99;
+
+                this.vy-=0.25;
+
+                if(this.y<0){
+                    this.remove=true;
+                }
+            };
+            this.render=function(){
+                POP.Draw.circle(this.x,this.y,this.r,this.color);
+            };
+
+        }
+
+        POP.Wave=function(){
+            this.x=-25;
+            this.y=-40;
+            this.r=50;
+            this.time=0;
+            this.offset=0;
+
+            this.total=Math.ceil(POP.WIDTH/this.r)+1;
+            this.update=function(){
+                this.time=new Date().getTime()*0.002;
+                this.offset=Math.sin(this.time*0.8)*5;
+            };
+
+            this.render=function(){
+                for(var i=0;i<this.total;i++){
+                    POP.Draw.circle(this.x+this.offset+(i*this.r),
+                        this.y,
+                        this.r,
+                        '#fff');
+                }
+            }
+
         };
 
         POP.Touch=function(x,y){
@@ -146,18 +231,49 @@ canvas { display: block; margin: 0 auto; background: #fff; }
             }
         }
 
+        POP.Score={
+            taps:0,
+            hit:0,
+            escaped:0,
+            accuracy:0,
+            update:function(){
+                POP.Score.accuracy=(POP.Score.hit/POP.Score.taps)*100;
+                POP.Score.accuracy=isNaN(POP.Score.accuracy)?0:~~(POP.Score.accuracy);
+            },
+            reset:function(){
+                POP.Score.taps=0;
+                POP.Score.hit=0;
+                POP.Score.escaped=0;
+                POP.Score.accuracy=0;
+            },
+            render:function(){
+                POP.Draw.text('Hit:'+POP.Score.hit,20,30,14,'#FFF');
+                POP.Draw.text('Escaped:'+POP.Score.escaped,20,50,14,'#FFF');
+                POP.Draw.text('Accuracy:'+POP.Score.accuracy+'%',20,70,14,'#FFF');
+            }
+        };
+
         POP.Bubble=function(){
             this.type="bubble";
-            this.x=100;
-            this.r=Math.floor((Math.random()*20)+10);
+            this.r=Math.floor((Math.random()*10)+5);
             this.d=2*this.r;
-            this.y=POP.HEIGHT+100;
+            this.x=Math.floor(Math.random()*(POP.WIDTH-this.d));
+            this.y=POP.HEIGHT;
             this.speed=Math.floor(Math.random()*3+1);
+            this.waveSize=5+this.r;
+            this.xConstant=this.x;
             this.remove=false;
+            this.vy=0.01;
 
             this.update=function(){
+                var time=new Date().getTime()*0.002;
+                this.speed+=this.vy;
                 this.y-=this.speed;
-                this.remove=this.y<(-1*this.d);
+                this.x=this.waveSize*Math.sin(time)+this.xConstant;
+                if(this.y<(-1*this.d)){
+                    this.remove=true;
+                    POP.Score.escaped+=1;
+                }
             };
 
             this.render=function(){
@@ -180,8 +296,8 @@ canvas { display: block; margin: 0 auto; background: #fff; }
                 POP.ctx.closePath();
                 POP.ctx.fill();
             },
-            text:function(str,x,y,color){
-                POP.ctx.font="";
+            text:function(str,x,y,size,color){
+                POP.ctx.font="bold "+(size||14)+'px Monospace';
                 POP.ctx.fillStyle=color||"#FFFFFF";
                 POP.ctx.fillText(str,x,y);
             }
