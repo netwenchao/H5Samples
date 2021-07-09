@@ -240,17 +240,35 @@ Explosion.prototype.step=function(dt){
 };
 
 var Level=function(levelData,callback){
-    this.data=[];
-    for(var s in levelData){
-        this.data.push(Object.create(levelData[s]));
+    this.levelData=[];
+    for(var i=0;i<levelData.length;i++){
+        this.levelData.push(Object.create(levelData[i]));
     }
     this.t=0;
     this.callback=callback;
 };
 
 Level.prototype.step=function(dt){
+    var idx=0,curShip=null,remove=[];
     this.t+=dt*1000;
+    while((curShip=this.levelData[idx]) && (curShip[0] < this.t + 2000)){
+        // Check if past the end time
+        if(this.t > curShip[1]) {
+            // If so, remove the entry
+            remove.push(curShip);
+        } else if(curShip[0] < this.t) {
+            // Get the enemy definition blueprint
+            var enemy = enemies[curShip[3]],
+            override = curShip[4];
+            // Add a new enemy with the blueprint and override
+            this.board.add(new Enemy(enemy,override));
+            // Increment the start time by the gap
+            curShip[0] += curShip[2];
+        }
+        idx++;
+    }
 };
+Level.prototype.draw=function(ctx){};
 
 var playGame=function(){
     var board=new GameBoard();
